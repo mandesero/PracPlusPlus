@@ -1,0 +1,6 @@
+/home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/CMakeFiles/rebuild_cache.dir
+/home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/CMakeFiles/edit_cache.dir
+/home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/CMakeFiles/SparceMatrixKit.dir
+/home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/src/CMakeFiles/rebuild_cache.dir
+/home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/src/CMakeFiles/edit_cache.dir
+/home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/src/CMakeFiles/Rational.dir

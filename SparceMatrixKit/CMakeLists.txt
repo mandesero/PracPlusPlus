@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.15)
+project(SparceMatrixKit)
+set(CMAKE_CXX_STANDARD 17)
+add_executable(SparceMatrixKit main.cpp)
+add_subdirectory(src)
+target_link_libraries(SparceMatrixKit Rational)

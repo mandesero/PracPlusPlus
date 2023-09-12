@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/src/Rational.cpp
+Rational.h
+/home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/src/Rational.h
+
+/home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/src/Rational.h
+iostream
+-
+type_traits
+-
+cmath
+-
+

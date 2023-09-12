@@ -1,0 +1,1 @@
+/usr/bin/c++     CMakeFiles/SparceMatrixKit.dir/main.cpp.o  -o SparceMatrixKit  src/libRational.a 
