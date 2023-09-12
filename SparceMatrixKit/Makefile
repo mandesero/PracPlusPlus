@@ -124,6 +124,19 @@ SparceMatrixKit/fast:
 .PHONY : SparceMatrixKit/fast
 
 #=============================================================================
+# Target rules for targets named Complex
+
+# Build rule for target.
+Complex: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 Complex
+.PHONY : Complex
+
+# fast build rule for target.
+Complex/fast:
+	$(MAKE) -f src/CMakeFiles/Complex.dir/build.make src/CMakeFiles/Complex.dir/build
+.PHONY : Complex/fast
+
+#=============================================================================
 # Target rules for targets named Rational
 
 # Build rule for target.
@@ -172,6 +185,7 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
 	@echo "... SparceMatrixKit"
+	@echo "... Complex"
 	@echo "... Rational"
 	@echo "... main.o"
 	@echo "... main.i"

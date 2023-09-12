@@ -1,2 +1,5 @@
-add_library(Rational Rational.cpp Rational.h)
-target_include_directories(Rational PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+add_library(Rational STATIC Rational.cpp Rational.h)
+
+add_library(Complex STATIC Complex.cpp Complex.h)
+
+target_link_libraries(SparceMatrixKit Rational Complex)

@@ -48,5 +48,6 @@ set(CMAKE_MAKEFILE_PRODUCTS
 # Dependency information for all targets:
 set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/SparceMatrixKit.dir/DependInfo.cmake"
+  "src/CMakeFiles/Complex.dir/DependInfo.cmake"
   "src/CMakeFiles/Rational.dir/DependInfo.cmake"
   )

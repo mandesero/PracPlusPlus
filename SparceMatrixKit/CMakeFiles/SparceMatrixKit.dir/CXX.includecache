@@ -11,10 +11,10 @@ iostream
 -
 stdint.h
 /home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/stdint.h
-src/Rational.h
-/home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/src/Rational.h
+Rational.h
+/home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/Rational.h
 
-/home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/src/Rational.h
+src/Rational.h
 iostream
 -
 type_traits
