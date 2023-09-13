@@ -3,4 +3,6 @@
 
 CMakeFiles/SparceMatrixKit.dir/main.cpp.o
  /home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/main.cpp
+ src/Complex.h
  src/Rational.h
+ src/Vector.h

@@ -1,0 +1,1 @@
+/usr/bin/g++  -g   CMakeFiles/SparceMatrixKit.dir/main.cpp.o  -o SparceMatrixKit  src/libRational.a src/libComplex.a src/libVector.a src/libRational.a src/libComplex.a src/libVector.a 

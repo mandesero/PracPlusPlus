@@ -100,8 +100,8 @@ public:
     {
         if (this != &other)
         {
-            this->numtor = other.numtor;
-            this->dentor = other.dentor;
+            this->numtor = other.getNumtor();
+            this->dentor = other.getDentor();
         }
         return *this;
     }
@@ -260,5 +260,99 @@ public:
                 denomerator -= numerator;
         this->numtor /= numerator;
         this->dentor /= denomerator;
+    }
+
+    template <typename S>
+    Rational_number<T> operator+(S num)
+    {
+        static_assert(std::is_signed<S>::value && std::is_integral<S>::value);
+
+        T numerator = this->numtor + this->dentor * static_cast<T>(num);
+        if (numerator == 0)
+            return Rational_number<T>(0, 1);
+        return Rational_number<T>(numerator, this->dentor);
+    }
+
+    template <typename S>
+    Rational_number<T> operator-(S num)
+    {
+        static_assert(std::is_signed<S>::value && std::is_integral<S>::value);
+
+        T numerator = this->numtor - this->dentor * static_cast<T>(num);
+        if (numerator == 0)
+            return Rational_number<T>(0, 1);
+        return Rational_number<T>(numerator, this->dentor);
+    }
+
+    template <typename S>
+    Rational_number<T> operator*(S num)
+    {
+        static_assert(std::is_signed<S>::value && std::is_integral<S>::value);
+
+        T numerator = this->numtor * static_cast<T>(num);
+        if (numerator == 0)
+            return Rational_number<T>(0, 1);
+        return Rational_number<T>(numerator, this->dentor);
+    }
+
+    template <typename S>
+    Rational_number<T> operator/(S num)
+    {
+        static_assert(std::is_signed<S>::value && std::is_integral<S>::value);
+
+        if (num == 0)
+            throw std::logic_error("Cant devide by zero");
+
+        T numerator = this->numtor / static_cast<T>(num);
+        if (numerator == 0)
+            return Rational_number<T>(0, 1);
+        return Rational_number<T>(numerator, this->dentor);
+    }
+
+    template <typename S>
+    Rational_number<T> &operator+=(S num)
+    {
+        static_assert(std::is_signed<S>::value && std::is_integral<S>::value);
+
+        this->numtor += this->dentor * static_cast<T>(num);
+        if (this->numtor == 0)
+            this->dentor = 1;
+        return *this;
+    }
+
+    template <typename S>
+    Rational_number<T> &operator-=(S num)
+    {
+        static_assert(std::is_signed<S>::value && std::is_integral<S>::value);
+
+        this->numtor -= this->dentor * static_cast<T>(num);
+        if (this->numtor == 0)
+            this->dentor = 1;
+        return *this;
+    }
+
+    template <typename S>
+    Rational_number<T> &operator*=(S num)
+    {
+        static_assert(std::is_signed<S>::value && std::is_integral<S>::value);
+
+        this->numtor *= static_cast<T>(num);
+        if (this->numtor == 0)
+            this->dentor = 1;
+        return *this;
+    }
+
+    template <typename S>
+    Rational_number<T> &operator/=(S num)
+    {
+        static_assert(std::is_signed<S>::value && std::is_integral<S>::value);
+
+        if (num == 0)
+            throw std::logic_error("Cant devide by zero");
+
+        this->numtor += this->dentor * static_cast<T>(num);
+        if (this->numtor == 0)
+            this->dentor = 1;
+        return *this;
     }
 };

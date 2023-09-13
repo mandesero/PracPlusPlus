@@ -1,0 +1,22 @@
+[
+{
+  "directory": "/home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/build",
+  "command": "/usr/bin/g++   -I/home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/src  -g   -std=gnu++2a -o CMakeFiles/SparceMatrixKit.dir/main.cpp.o -c /home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/main.cpp",
+  "file": "/home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/main.cpp"
+},
+{
+  "directory": "/home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/build/src",
+  "command": "/usr/bin/g++    -g   -std=gnu++2a -o CMakeFiles/Vector.dir/Vector.cpp.o -c /home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/src/Vector.cpp",
+  "file": "/home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/src/Vector.cpp"
+},
+{
+  "directory": "/home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/build/src",
+  "command": "/usr/bin/g++    -g   -std=gnu++2a -o CMakeFiles/Complex.dir/Complex.cpp.o -c /home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/src/Complex.cpp",
+  "file": "/home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/src/Complex.cpp"
+},
+{
+  "directory": "/home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/build/src",
+  "command": "/usr/bin/g++    -g   -std=gnu++2a -o CMakeFiles/Rational.dir/Rational.cpp.o -c /home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/src/Rational.cpp",
+  "file": "/home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/src/Rational.cpp"
+}
+]

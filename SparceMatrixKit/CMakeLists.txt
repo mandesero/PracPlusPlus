@@ -3,7 +3,5 @@ project(SparceMatrixKit)
 set(CMAKE_CXX_STANDARD 20)
 add_executable(SparceMatrixKit main.cpp)
 add_subdirectory(src)
-target_link_libraries(SparceMatrixKit Rational Complex)
+target_link_libraries(SparceMatrixKit Rational Complex Vector)
 target_include_directories(SparceMatrixKit PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
-
-# cmake_minimum_required(VERSION 3.16)

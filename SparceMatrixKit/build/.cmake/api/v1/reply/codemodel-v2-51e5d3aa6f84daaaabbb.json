@@ -1,0 +1,104 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1
+					],
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.16"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						2
+					]
+				},
+				{
+					"build" : "src",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.16"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "src",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						3
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0,
+						1
+					],
+					"name" : "SparceMatrixKit",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 1,
+					"id" : "Complex::@145eef247bfb46b6828c",
+					"jsonFile" : "target-Complex-Debug-c48fb8205507124f04f5.json",
+					"name" : "Complex",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "Rational::@145eef247bfb46b6828c",
+					"jsonFile" : "target-Rational-Debug-6cbd2311b60d85ff591f.json",
+					"name" : "Rational",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "SparceMatrixKit::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-SparceMatrixKit-Debug-13d5576cb9c2c0b31de3.json",
+					"name" : "SparceMatrixKit",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "Vector::@145eef247bfb46b6828c",
+					"jsonFile" : "target-Vector-Debug-c28019f4d99bdc087378.json",
+					"name" : "Vector",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/build",
+		"source" : "/home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 0
+	}
+}

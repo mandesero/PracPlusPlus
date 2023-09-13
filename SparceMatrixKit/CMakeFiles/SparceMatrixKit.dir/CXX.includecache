@@ -13,6 +13,18 @@ stdint.h
 /home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/stdint.h
 Rational.h
 /home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/Rational.h
+Complex.h
+/home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/Complex.h
+Vector.h
+/home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/Vector.h
+
+src/Complex.h
+iostream
+-
+type_traits
+-
+cmath
+-
 
 src/Rational.h
 iostream
@@ -20,5 +32,15 @@ iostream
 type_traits
 -
 cmath
+-
+
+src/Vector.h
+iostream
+-
+type_traits
+-
+cmath
+-
+map
 -
 

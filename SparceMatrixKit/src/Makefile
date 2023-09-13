@@ -111,6 +111,21 @@ depend:
 .PHONY : depend
 
 # Convenience name for target.
+src/CMakeFiles/Vector.dir/rule:
+	cd /home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit && $(MAKE) -f CMakeFiles/Makefile2 src/CMakeFiles/Vector.dir/rule
+.PHONY : src/CMakeFiles/Vector.dir/rule
+
+# Convenience name for target.
+Vector: src/CMakeFiles/Vector.dir/rule
+
+.PHONY : Vector
+
+# fast build rule for target.
+Vector/fast:
+	cd /home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit && $(MAKE) -f src/CMakeFiles/Vector.dir/build.make src/CMakeFiles/Vector.dir/build
+.PHONY : Vector/fast
+
+# Convenience name for target.
 src/CMakeFiles/Complex.dir/rule:
 	cd /home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit && $(MAKE) -f CMakeFiles/Makefile2 src/CMakeFiles/Complex.dir/rule
 .PHONY : src/CMakeFiles/Complex.dir/rule
@@ -194,6 +209,33 @@ Rational.cpp.s:
 	cd /home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit && $(MAKE) -f src/CMakeFiles/Rational.dir/build.make src/CMakeFiles/Rational.dir/Rational.cpp.s
 .PHONY : Rational.cpp.s
 
+Vector.o: Vector.cpp.o
+
+.PHONY : Vector.o
+
+# target to build an object file
+Vector.cpp.o:
+	cd /home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit && $(MAKE) -f src/CMakeFiles/Vector.dir/build.make src/CMakeFiles/Vector.dir/Vector.cpp.o
+.PHONY : Vector.cpp.o
+
+Vector.i: Vector.cpp.i
+
+.PHONY : Vector.i
+
+# target to preprocess a source file
+Vector.cpp.i:
+	cd /home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit && $(MAKE) -f src/CMakeFiles/Vector.dir/build.make src/CMakeFiles/Vector.dir/Vector.cpp.i
+.PHONY : Vector.cpp.i
+
+Vector.s: Vector.cpp.s
+
+.PHONY : Vector.s
+
+# target to generate assembly for a file
+Vector.cpp.s:
+	cd /home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit && $(MAKE) -f src/CMakeFiles/Vector.dir/build.make src/CMakeFiles/Vector.dir/Vector.cpp.s
+.PHONY : Vector.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -201,6 +243,7 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... edit_cache"
+	@echo "... Vector"
 	@echo "... rebuild_cache"
 	@echo "... Complex"
 	@echo "... Rational"
@@ -210,6 +253,9 @@ help:
 	@echo "... Rational.o"
 	@echo "... Rational.i"
 	@echo "... Rational.s"
+	@echo "... Vector.o"
+	@echo "... Vector.i"
+	@echo "... Vector.s"
 .PHONY : help
 
 
