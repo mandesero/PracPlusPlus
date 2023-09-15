@@ -73,6 +73,10 @@
 	[
 		{
 			"backtrace" : 2,
+			"id" : "Matrix::@145eef247bfb46b6828c"
+		},
+		{
+			"backtrace" : 2,
 			"id" : "Vector::@145eef247bfb46b6828c"
 		},
 		{
@@ -114,6 +118,11 @@
 			},
 			{
 				"backtrace" : 2,
+				"fragment" : "src/libMatrix.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 2,
 				"fragment" : "src/libRational.a",
 				"role" : "libraries"
 			},
@@ -125,6 +134,11 @@
 			{
 				"backtrace" : 2,
 				"fragment" : "src/libVector.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 2,
+				"fragment" : "src/libMatrix.a",
 				"role" : "libraries"
 			}
 		],

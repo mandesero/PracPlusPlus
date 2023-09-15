@@ -3,6 +3,7 @@
 
 CMakeFiles/SparceMatrixKit.dir/main.cpp.o: main.cpp
 CMakeFiles/SparceMatrixKit.dir/main.cpp.o: src/Complex.h
+CMakeFiles/SparceMatrixKit.dir/main.cpp.o: src/Matrix.h
 CMakeFiles/SparceMatrixKit.dir/main.cpp.o: src/Rational.h
 CMakeFiles/SparceMatrixKit.dir/main.cpp.o: src/Vector.h
 

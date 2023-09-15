@@ -6,6 +6,11 @@
 },
 {
   "directory": "/home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/build/src",
+  "command": "/usr/bin/g++    -g   -std=gnu++2a -o CMakeFiles/Matrix.dir/Matrix.cpp.o -c /home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/src/Matrix.cpp",
+  "file": "/home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/src/Matrix.cpp"
+},
+{
+  "directory": "/home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/build/src",
   "command": "/usr/bin/g++    -g   -std=gnu++2a -o CMakeFiles/Vector.dir/Vector.cpp.o -c /home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/src/Vector.cpp",
   "file": "/home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/src/Vector.cpp"
 },

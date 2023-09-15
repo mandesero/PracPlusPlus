@@ -17,8 +17,18 @@ Complex.h
 /home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/Complex.h
 Vector.h
 /home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/Vector.h
+Matrix.h
+/home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/Matrix.h
 
 src/Complex.h
+iostream
+-
+type_traits
+-
+cmath
+-
+
+src/Matrix.h
 iostream
 -
 type_traits

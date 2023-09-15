@@ -111,6 +111,21 @@ depend:
 .PHONY : depend
 
 # Convenience name for target.
+src/CMakeFiles/Matrix.dir/rule:
+	cd /home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit && $(MAKE) -f CMakeFiles/Makefile2 src/CMakeFiles/Matrix.dir/rule
+.PHONY : src/CMakeFiles/Matrix.dir/rule
+
+# Convenience name for target.
+Matrix: src/CMakeFiles/Matrix.dir/rule
+
+.PHONY : Matrix
+
+# fast build rule for target.
+Matrix/fast:
+	cd /home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit && $(MAKE) -f src/CMakeFiles/Matrix.dir/build.make src/CMakeFiles/Matrix.dir/build
+.PHONY : Matrix/fast
+
+# Convenience name for target.
 src/CMakeFiles/Vector.dir/rule:
 	cd /home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit && $(MAKE) -f CMakeFiles/Makefile2 src/CMakeFiles/Vector.dir/rule
 .PHONY : src/CMakeFiles/Vector.dir/rule
@@ -182,6 +197,33 @@ Complex.cpp.s:
 	cd /home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit && $(MAKE) -f src/CMakeFiles/Complex.dir/build.make src/CMakeFiles/Complex.dir/Complex.cpp.s
 .PHONY : Complex.cpp.s
 
+Matrix.o: Matrix.cpp.o
+
+.PHONY : Matrix.o
+
+# target to build an object file
+Matrix.cpp.o:
+	cd /home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit && $(MAKE) -f src/CMakeFiles/Matrix.dir/build.make src/CMakeFiles/Matrix.dir/Matrix.cpp.o
+.PHONY : Matrix.cpp.o
+
+Matrix.i: Matrix.cpp.i
+
+.PHONY : Matrix.i
+
+# target to preprocess a source file
+Matrix.cpp.i:
+	cd /home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit && $(MAKE) -f src/CMakeFiles/Matrix.dir/build.make src/CMakeFiles/Matrix.dir/Matrix.cpp.i
+.PHONY : Matrix.cpp.i
+
+Matrix.s: Matrix.cpp.s
+
+.PHONY : Matrix.s
+
+# target to generate assembly for a file
+Matrix.cpp.s:
+	cd /home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit && $(MAKE) -f src/CMakeFiles/Matrix.dir/build.make src/CMakeFiles/Matrix.dir/Matrix.cpp.s
+.PHONY : Matrix.cpp.s
+
 Rational.o: Rational.cpp.o
 
 .PHONY : Rational.o
@@ -243,6 +285,7 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... edit_cache"
+	@echo "... Matrix"
 	@echo "... Vector"
 	@echo "... rebuild_cache"
 	@echo "... Complex"
@@ -250,6 +293,9 @@ help:
 	@echo "... Complex.o"
 	@echo "... Complex.i"
 	@echo "... Complex.s"
+	@echo "... Matrix.o"
+	@echo "... Matrix.i"
+	@echo "... Matrix.s"
 	@echo "... Rational.o"
 	@echo "... Rational.i"
 	@echo "... Rational.s"

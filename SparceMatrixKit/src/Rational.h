@@ -355,4 +355,14 @@ public:
             this->dentor = 1;
         return *this;
     }
+
+    double abs()
+    {
+        return std::abs(static_cast<double>(this->numtor) / (this->dentor));
+    }
+
+    std::string to_string() const {
+        return std::to_string(this->numtor) + '/' + std::to_string(this->dentor);
+    }
+
 };

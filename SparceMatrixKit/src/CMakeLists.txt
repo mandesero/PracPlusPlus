@@ -4,4 +4,6 @@ add_library(Complex STATIC Complex.cpp Complex.h)
 
 add_library(Vector STATIC Vector.cpp Vector.h)
 
-target_link_libraries(SparceMatrixKit Rational Complex Vector)
+add_library(Matrix STATIC Matrix.cpp Matrix.h)
+
+target_link_libraries(SparceMatrixKit Rational Complex Vector Matrix)

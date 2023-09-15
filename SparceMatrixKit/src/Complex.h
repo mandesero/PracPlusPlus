@@ -278,4 +278,15 @@ public:
         out << other.getReal() << "," << other.getImag() << std::endl;
         return out;
     }
+
+
+    // abs
+    double abs()
+    {
+        return sqrt(this->getRadius());
+    }
+
+    std::string to_string() const {
+        return std::to_string(this->real) + '+' + std::to_string(this->imag) + 'i';
+    }
 };

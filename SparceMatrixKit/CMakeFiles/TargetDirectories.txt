@@ -2,6 +2,7 @@
 /home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/CMakeFiles/edit_cache.dir
 /home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/CMakeFiles/SparceMatrixKit.dir
 /home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/src/CMakeFiles/edit_cache.dir
+/home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/src/CMakeFiles/Matrix.dir
 /home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/src/CMakeFiles/Vector.dir
 /home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/src/CMakeFiles/rebuild_cache.dir
 /home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/src/CMakeFiles/Complex.dir

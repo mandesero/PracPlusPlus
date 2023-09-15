@@ -82,9 +82,11 @@ SparceMatrixKit: CMakeFiles/SparceMatrixKit.dir/build.make
 SparceMatrixKit: src/libRational.a
 SparceMatrixKit: src/libComplex.a
 SparceMatrixKit: src/libVector.a
+SparceMatrixKit: src/libMatrix.a
 SparceMatrixKit: src/libRational.a
 SparceMatrixKit: src/libComplex.a
 SparceMatrixKit: src/libVector.a
+SparceMatrixKit: src/libMatrix.a
 SparceMatrixKit: CMakeFiles/SparceMatrixKit.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable SparceMatrixKit"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/SparceMatrixKit.dir/link.txt --verbose=$(VERBOSE)
