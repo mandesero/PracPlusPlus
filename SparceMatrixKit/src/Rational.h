@@ -14,26 +14,18 @@ protected:
     T dentor; /* Denomenator */
 
 private:
-    Rational_number(T numerator, T denominator)
-    {
-        this->numtor = (denominator > 0 ? 1 : -1) * numerator;
-        this->dentor = (denominator > 0 ? 1 : -1) * denominator;
-    }
-
 public:
-    T getNumtor() const
-    {
-        return this->numtor;
-    }
-
-    T getDentor() const
-    {
-        return this->dentor;
-    }
-
     Rational_number() : numtor(0), dentor(1) {}
 
     Rational_number(long int num) : numtor(num), dentor(1) {}
+
+    Rational_number(T numerator, T denominator)
+    {
+        if (denominator == 0)
+            throw std::logic_error("Denominator cannot be zero");
+        this->numtor = (denominator > 0 ? 1 : -1) * numerator;
+        this->dentor = (denominator > 0 ? 1 : -1) * denominator;
+    }
 
     Rational_number(const char *str)
     {
@@ -42,8 +34,8 @@ public:
         T numerator, denominator;
         if (i != std::string::npos)
         {
-            numerator = std::stol(s.substr(0, i));
-            denominator = std::stol(s.substr(i + 1));
+            numerator = static_cast<T>(std::stol(s.substr(0, i)));
+            denominator = static_cast<T>(std::stol(s.substr(i + 1)));
             if (denominator == 0)
             {
                 throw std::logic_error("Denominator cannot be zero");
@@ -60,12 +52,22 @@ public:
 
     Rational_number(const char *num, const char *denom)
     {
-        T numerator = std::atol(num);
-        T denominator = std::atol(denom);
+        T numerator = static_cast<T>(std::atol(num));
+        T denominator = static_cast<T>(std::atol(denom));
         if (denominator == 0)
             throw std::logic_error("Denominator cannot be zero");
         this->numtor = (denominator > 0 ? 1 : -1) * numerator;
         this->dentor = (denominator > 0 ? 1 : -1) * denominator;
+    }
+
+    T getNumtor() const
+    {
+        return this->numtor;
+    }
+
+    T getDentor() const
+    {
+        return this->dentor;
     }
 
     T floor() const
@@ -76,11 +78,6 @@ public:
     T round() const
     {
         return static_cast<T>(std::round(static_cast<double>(this->numtor) / this->dentor));
-    }
-
-    void print()
-    {
-        std::cout << this->numtor << " " << this->dentor << std::endl;
     }
 
     operator double() const
@@ -113,72 +110,53 @@ public:
         return *this;
     }
 
-    Rational_number<T> operator+(const Rational_number<T> &other) const
+    // operator +
+
+    template <typename OtherT>
+    Rational_number<T> operator+(const Rational_number<OtherT> &other) const
     {
-        T numerator = this->numtor * other.getDentor() + other.getNumtor() * this->dentor;
-        T denominator = this->dentor * other.getDentor();
+        static_assert(std::is_convertible<OtherT, T>::value, "Invalid type conversion");
+
+        T numerator = this->numtor * static_cast<T>(other.getDentor()) + static_cast<T>(other.getNumtor()) * this->dentor;
+        T denominator = this->dentor * static_cast<T>(other.getDentor());
         if (numerator == 0)
             return Rational_number<T>(0, 1);
         return Rational_number<T>(numerator, denominator);
     }
 
-    Rational_number<T> operator-(const Rational_number<T> &other) const
+    template <typename OtherT>
+    Rational_number<T> operator+(const OtherT &other) const
     {
-        T numerator = this->numtor * other.getDentor() - other.getNumtor() * this->dentor;
-        T denominator = this->dentor * other.getDentor();
+        static_assert(std::is_convertible<OtherT, T>::value, "Invalid type conversion");
+
+        T numerator = this->numtor + this->dentor * static_cast<T>(other);
         if (numerator == 0)
             return Rational_number<T>(0, 1);
-        return Rational_number<T>(numerator, denominator);
+        return Rational_number<T>(numerator, this->dentor);
     }
 
-    Rational_number<T> operator*(const Rational_number<T> &other) const
+    template <typename OtherT>
+    Rational_number<T> &operator+=(const Rational_number<OtherT> &other)
     {
-        T numerator = this->numtor * other.getNumtor();
-        if (numerator == 0)
-            return Rational_number<T>(0, 1);
-        T denominator = this->dentor * other.getDentor();
-        return Rational_number<T>(numerator, denominator);
+        static_assert(std::is_convertible<OtherT, T>::value, "Invalid type conversion");
+
+        this->numtor = this->numtor * static_cast<T>(other.getDentor()) + static_cast<T>(other.getNumtor()) * this->dentor;
+        if (this->numtor == 0)
+            this->dentor = 1;
+        else
+            this->dentor *= static_cast<T>(other.getDentor());
+        return *this;
     }
 
-    Rational_number<T> operator/(const Rational_number<T> &other) const
+    template <typename OtherT>
+    Rational_number<T> &operator+=(const OtherT &other)
     {
-        if (other.getNumtor() == 0)
-            throw std::logic_error("Cant devide by zero");
-        T numerator = this->numtor * other.getDentor();
-        if (numerator == 0)
-            return Rational_number<T>(0, 1);
-        T denominator = this->dentor * other.getNumtor();
-        return Rational_number<T>(numerator, denominator);
-    }
+        static_assert(std::is_convertible<OtherT, T>::value, "Invalid type conversion");
 
-    bool operator<(const Rational_number<T> &other) const
-    {
-        return (this->numtor * other.getDentor()) < (other.getNumtor() * this->dentor);
-    }
-
-    bool operator>(const Rational_number<T> &other) const
-    {
-        return (this->numtor * other.getDentor()) > (other.getNumtor() * this->dentor);
-    }
-
-    bool operator<=(const Rational_number<T> &other) const
-    {
-        return (this->numtor * other.getDentor()) <= (other.getNumtor() * this->dentor);
-    }
-
-    bool operator>=(const Rational_number<T> &other) const
-    {
-        return (this->numtor * other.getDentor()) >= (other.getNumtor() * this->dentor);
-    }
-
-    bool operator==(const Rational_number<T> &other) const
-    {
-        return (this->numtor * other.getDentor()) == (other.getNumtor() * this->dentor);
-    }
-
-    bool operator!=(const Rational_number<T> &other) const
-    {
-        return (this->numtor * other.getDentor()) != (other.getNumtor() * this->dentor);
+        this->numtor += static_cast<T>(other) * this->dentor;
+        if (this->numtor == 0)
+            this->dentor = 1;
+        return *this;
     }
 
     Rational_number<T> &operator++()
@@ -197,44 +175,52 @@ public:
         return *this;
     }
 
-    Rational_number<T> &operator+=(const Rational_number<T> &other)
+    // operator -
+
+    template <typename OtherT>
+    Rational_number<T> operator-(const Rational_number<OtherT> &other) const
     {
-        this->numtor = this->numtor * other.getDentor() + other.getNumtor() * this->dentor;
+        static_assert(std::is_convertible<OtherT, T>::value, "Invalid type conversion");
+
+        T numerator = this->numtor * static_cast<T>(other.getDentor()) - static_cast<T>(other.getNumtor()) * this->dentor;
+        T denominator = this->dentor * static_cast<T>(other.getDentor());
+        if (numerator == 0)
+            return Rational_number<T>(0, 1);
+        return Rational_number<T>(numerator, denominator);
+    }
+
+    template <typename OtherT>
+    Rational_number<T> operator-(const OtherT &other) const
+    {
+        static_assert(std::is_convertible<OtherT, T>::value, "Invalid type conversion");
+
+        T numerator = this->numtor - this->dentor * static_cast<T>(other);
+        if (numerator == 0)
+            return Rational_number<T>(0, 1);
+        return Rational_number<T>(numerator, this->dentor);
+    }
+
+    template <typename OtherT>
+    Rational_number<T> &operator-=(const Rational_number<OtherT> &other)
+    {
+        static_assert(std::is_convertible<OtherT, T>::value, "Invalid type conversion");
+
+        this->numtor = this->numtor * static_cast<T>(other.getDentor()) - static_cast<T>(other.getNumtor()) * this->dentor;
         if (this->numtor == 0)
             this->dentor = 1;
         else
-            this->dentor *= other.getDentor();
+            this->dentor *= static_cast<T>(other.getDentor());
         return *this;
     }
 
-    Rational_number<T> &operator-=(const Rational_number<T> &other)
+    template <typename OtherT>
+    Rational_number<T> &operator-=(const OtherT &other)
     {
-        this->numtor = this->numtor * other.getDentor() - other.getNumtor() * this->dentor;
+        static_assert(std::is_convertible<OtherT, T>::value, "Invalid type conversion");
+
+        this->numtor -= static_cast<T>(other) * this->dentor;
         if (this->numtor == 0)
             this->dentor = 1;
-        else
-            this->dentor *= other.getDentor();
-        return *this;
-    }
-
-    Rational_number<T> &operator*=(const Rational_number<T> &other)
-    {
-        this->numtor *= other.getNumtor();
-        if (this->numtor == 0)
-            this->dentor = 1;
-        else
-            this->dentor *= other.getDentor();
-        return *this;
-    }
-
-    Rational_number<T> &operator/=(const Rational_number<T> &other)
-    {
-        if (this->numtor == 0)
-            return *this;
-        if (other.getNumtor() == 0)
-            throw std::logic_error("Cant devide by zero");
-        this->numtor *= (other.getNumtor() > 0 ? 1 : -1) * other.getDentor();
-        this->dentor *= (other.getNumtor() > 0 ? 1 : -1) * other.getNumtor();
         return *this;
     }
 
@@ -242,6 +228,127 @@ public:
     {
         return Rational_number<T>(-this->numtor, this->dentor);
     }
+
+    // operator *
+
+    template <typename OtherT>
+    Rational_number<T> operator*(const Rational_number<OtherT> &other) const
+    {
+        static_assert(std::is_convertible<OtherT, T>::value, "Invalid type conversion");
+
+        T numerator = this->numtor * static_cast<T>(other.getNumtor());
+        T denominator = this->dentor * static_cast<T>(other.getDentor());
+        if (numerator == 0)
+            return Rational_number<T>(0, 1);
+        return Rational_number<T>(numerator, denominator);
+    }
+
+    template <typename OtherT>
+    Rational_number<T> operator*(const OtherT &other) const
+    {
+        static_assert(std::is_convertible<OtherT, T>::value, "Invalid type conversion");
+
+        if (other == 0)
+            return Rational_number<T>(0, 1);
+
+        T numerator = this->numtor * static_cast<T>(other);
+        T denominator = this->dentor;
+        return Rational_number<T>(numerator, denominator);
+    }
+
+    template <typename OtherT>
+    Rational_number<T> &operator*=(const Rational_number<OtherT> &other)
+    {
+        static_assert(std::is_convertible<OtherT, T>::value, "Invalid type conversion");
+
+        this->numtor *= static_cast<T>(other.getNumtor());
+        if (this->numtor == 0)
+            this->dentor = 1;
+        else
+            this->dentor *= static_cast<T>(other.getDentor());
+        return *this;
+    }
+
+    template <typename OtherT>
+    Rational_number<T> &operator*=(const OtherT &other)
+    {
+        static_assert(std::is_convertible<OtherT, T>::value, "Invalid type conversion");
+
+        this->numtor *= static_cast<T>(other);
+        if (this->numtor == 0)
+            this->dentor = 1;
+        return *this;
+    }
+
+    // opeator /
+
+    template <typename OtherT>
+    Rational_number<T> operator/(const Rational_number<OtherT> &other) const
+    {
+        static_assert(std::is_convertible<OtherT, T>::value, "Invalid type conversion");
+
+        T numerator = this->numtor * static_cast<T>(other.getDentor());
+        T denominator = this->dentor * static_cast<T>(other.getNumtor());
+        if (numerator == 0)
+            return Rational_number<T>(0, 1);
+        return Rational_number<T>(numerator, denominator);
+    }
+
+    template <typename OtherT>
+    Rational_number<T> operator/(const OtherT &other) const
+    {
+        static_assert(std::is_convertible<OtherT, T>::value, "Invalid type conversion");
+
+        if (other == 0)
+            throw std::logic_error("Cant devide by zero");
+
+        T numerator = this->numtor;
+        T denominator = this->dentor * static_cast<T>(other);
+        return Rational_number<T>(numerator, denominator);
+    }
+
+    template <typename OtherT>
+    Rational_number<T> &operator/=(const Rational_number<OtherT> &other)
+    {
+        static_assert(std::is_convertible<OtherT, T>::value, "Invalid type conversion");
+
+        if (other.getNumtor() == 0)
+            throw std::logic_error("Cant devide by zero");
+
+        this->numtor *= static_cast<T>(other.getDentor());
+        this->dentor *= static_cast<T>(other.getNumtor());
+        return *this;
+    }
+
+    template <typename OtherT>
+    Rational_number<T> &operator/=(const OtherT &other)
+    {
+        static_assert(std::is_convertible<OtherT, T>::value, "Invalid type conversion");
+
+        if (other == 0)
+            throw std::logic_error("Cant devide by zero");
+
+        this->dentor *= static_cast<T>(other);
+        return *this;
+    }
+
+    // compare operators
+
+    template <typename OtherT>
+    bool operator<(const Rational_number<OtherT> &other) const
+    {
+        static_assert(std::is_convertible<OtherT, T>::value, "Invalid type conversion");
+        return (this->numtor * static_cast<T>(other.getDentor())) < (static_cast<T>(other.getNumtor()) * this->dentor);
+    }
+
+    template <typename OtherT>
+    bool operator<(const OtherT &other) const
+    {
+        static_assert(std::is_convertible<OtherT, T>::value, "Invalid type conversion");
+        return (this->numtor) < (static_cast<T>(other) * this->dentor);
+    }
+
+    // std::cout
 
     friend std::ostream &operator<<(std::ostream &out, const Rational_number<T> &other)
     {
@@ -262,107 +369,13 @@ public:
         this->dentor /= denomerator;
     }
 
-    template <typename S>
-    Rational_number<T> operator+(S num)
-    {
-        static_assert(std::is_signed<S>::value && std::is_integral<S>::value);
-
-        T numerator = this->numtor + this->dentor * static_cast<T>(num);
-        if (numerator == 0)
-            return Rational_number<T>(0, 1);
-        return Rational_number<T>(numerator, this->dentor);
-    }
-
-    template <typename S>
-    Rational_number<T> operator-(S num)
-    {
-        static_assert(std::is_signed<S>::value && std::is_integral<S>::value);
-
-        T numerator = this->numtor - this->dentor * static_cast<T>(num);
-        if (numerator == 0)
-            return Rational_number<T>(0, 1);
-        return Rational_number<T>(numerator, this->dentor);
-    }
-
-    template <typename S>
-    Rational_number<T> operator*(S num)
-    {
-        static_assert(std::is_signed<S>::value && std::is_integral<S>::value);
-
-        T numerator = this->numtor * static_cast<T>(num);
-        if (numerator == 0)
-            return Rational_number<T>(0, 1);
-        return Rational_number<T>(numerator, this->dentor);
-    }
-
-    template <typename S>
-    Rational_number<T> operator/(S num)
-    {
-        static_assert(std::is_signed<S>::value && std::is_integral<S>::value);
-
-        if (num == 0)
-            throw std::logic_error("Cant devide by zero");
-
-        T numerator = this->numtor / static_cast<T>(num);
-        if (numerator == 0)
-            return Rational_number<T>(0, 1);
-        return Rational_number<T>(numerator, this->dentor);
-    }
-
-    template <typename S>
-    Rational_number<T> &operator+=(S num)
-    {
-        static_assert(std::is_signed<S>::value && std::is_integral<S>::value);
-
-        this->numtor += this->dentor * static_cast<T>(num);
-        if (this->numtor == 0)
-            this->dentor = 1;
-        return *this;
-    }
-
-    template <typename S>
-    Rational_number<T> &operator-=(S num)
-    {
-        static_assert(std::is_signed<S>::value && std::is_integral<S>::value);
-
-        this->numtor -= this->dentor * static_cast<T>(num);
-        if (this->numtor == 0)
-            this->dentor = 1;
-        return *this;
-    }
-
-    template <typename S>
-    Rational_number<T> &operator*=(S num)
-    {
-        static_assert(std::is_signed<S>::value && std::is_integral<S>::value);
-
-        this->numtor *= static_cast<T>(num);
-        if (this->numtor == 0)
-            this->dentor = 1;
-        return *this;
-    }
-
-    template <typename S>
-    Rational_number<T> &operator/=(S num)
-    {
-        static_assert(std::is_signed<S>::value && std::is_integral<S>::value);
-
-        if (num == 0)
-            throw std::logic_error("Cant devide by zero");
-
-        this->numtor += this->dentor * static_cast<T>(num);
-        if (this->numtor == 0)
-            this->dentor = 1;
-        return *this;
-    }
-
-    double abs()
+    double abs() const
     {
         return std::abs(static_cast<double>(this->numtor) / (this->dentor));
     }
 
-    std::string to_string() const {
-        return std::to_string(this->numtor) + '/' + std::to_string(this->dentor);
+    std::string to_string() const
+    {
+        return std::to_string((int)(this->numtor)) + '/' + std::to_string((int)(this->dentor));
     }
-
 };

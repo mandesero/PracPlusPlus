@@ -3,85 +3,92 @@
 #include <iostream>
 #include <type_traits>
 #include <cmath>
+#include <map>
+#include <utility>
 
-template <int size_1, int size_2, typename T>
+template <int rows, int columns, typename T>
 class Matrix
 {
 protected:
-    double eps;
-    std::map<std::pair<int, int>, T> data;
-    int rows = size_1;
-    int colomns = size_2;
+    std::map<std::pair<int, int>, T> data; /**< Словарь для хранения элементов матрицы */
+    double eps;                            /**< Пороговое значение для признания числа нулевым */
 
 public:
-    Matrix(double eps = 0) : eps(eps), data() {}
+    /**
+     * Конструктор класса Matrix.
+     * @param epsilon Пороговое значение для признания числа нулевым. По умолчанию равно 0.
+     */
+    Matrix(double epsilon = 0) : eps(epsilon) {}
 
-    void setValue(std::pair<int, int> coords, T &val)
+    /**
+     * Получение значения элемента матрицы по заданным индексам.
+     * Если элемент не найден, возвращается нулевое значение типа T.
+     * @param row Индекс строки.
+     * @param column Индекс столбца.
+     * @return Значение элемента матрицы.
+     */
+    const T &at(int row, int column) const
     {
-        if (val.abs() < this->eps)
-            return;
-        data[coords] = val;
+        auto it = data.find(std::make_pair(row, column));
+        if (it == data.end())
+        {
+            static const T zero;
+            return zero;
+        }
+        else
+        {
+            return it->second;
+        }
     }
 
+    /**
+     * Установка значения элемента матрицы по заданным индексам.
+     * Если значение меньше epsilon, элемент удаляется из словаря.
+     * @param row Индекс строки.
+     * @param column Индекс столбца.
+     * @param value Значение элемента матрицы.
+     */
+    void set(int row, int column, const T &value)
+    {
+        if (value.abs() >= eps)
+            data[std::make_pair(row, column)] = value;
+    }
+
+    /**
+     * Возвращает строковое представление матрицы.
+     * @return Строковое представление матрицы.
+     */
     std::string to_string() const
     {
         std::string result;
-        for (int i = 0; i < rows; i++)
+        for (int i = 1; i < rows + 1; ++i)
         {
-            for (int j = 0; j < colomns; j++)
-            {
-                std::pair<int, int> key = std::make_pair(i + 1, j + 1);
-                if (data.count(key) > 0)
-                {
-                    result += data.at(key).to_string();
-                }
-                else
-                {
-                    result += "0";
-                }
-                if (j < colomns - 1)
-                {
-                    result += " ";
-                }
-            }
+            for (int j = 1; j < columns + 1; ++j)
+                result += at(i, j).to_string() + " ";
             result += "\n";
         }
         return result;
     }
 
-    T getValue(std::pair<int, int> coords) {
-        return data[coords];
-    }
-
-    template <int s_1, int s_2, typename U>
-    Matrix<size_1, size_2, T> operator+(const Matrix<s_1, s_2, U> &other)
+    /**
+     * Перегрузка оператора сложения для матриц с проверкой совпадения размеров и возможности приведения типов чисел.
+     * @tparam OtherT Тип чисел во второй матрице.
+     * @param other Матрица для сложения.
+     * @return Новая матрица, являющаяся результатом сложения.
+     */
+    template <typename OtherT>
+    Matrix<rows, columns, T> operator+(const Matrix<rows, columns, OtherT> &other)
     {
-        if (size_1 != s_1 || size_2 != s_2)
-            throw std::logic_error("cant sum matrix with diffsize");
-
-        Matrix<size_1, size_2, T> result(this->eps);
-
-        for (int i = 0; i < size_1; i++)
+        static_assert(std::is_convertible<OtherT, T>::value, "Invalid type conversion");
+        Matrix<rows, columns, T> result;
+        for (int i = 1; i < rows + 1; ++i)
         {
-            for (int j = 0; j < size_2; j++)
+            for (int j = 1; j < columns + 1; ++j)
             {
-                std::pair<int, int> key = std::make_pair(i + 1, j + 1);
-
-                T value1 = data.count(key) > 0 ? data.at(key) : T();
-                T value2 = static_cast<T>(other.getValue(key));
-
-                T tmp = value1 + value2;
-                result.setValue(key, tmp);
+                T value = at(i, j) + static_cast<T>(other.at(i, j));
+                result.set(i, j, value);
             }
         }
-
         return result;
     }
-};
-
-template <int size_1, int size_2>
-class Matrix<size_1, size_2, bool>
-{
-protected:
-public:
 };

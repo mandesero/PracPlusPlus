@@ -82,7 +82,7 @@ public:
     }
 
     template <typename T1>
-    Complex_number<T, U> operator+(const T1 num) const
+    Complex_number<T, U> operator+(const T1 &num) const
     {
         T re = this->real + static_cast<T>(num);
         U im = this->imag;
@@ -98,7 +98,7 @@ public:
     }
 
     template <typename T1>
-    Complex_number<T, U> &operator+=(const T1 num)
+    Complex_number<T, U> &operator+=(const T1 &num)
     {
         this->real += static_cast<T>(num);
         return *this;
@@ -279,14 +279,14 @@ public:
         return out;
     }
 
-
     // abs
-    double abs()
+    double abs() const
     {
         return sqrt(this->getRadius());
     }
 
-    std::string to_string() const {
+    std::string to_string() const
+    {
         return std::to_string(this->real) + '+' + std::to_string(this->imag) + 'i';
     }
 };
