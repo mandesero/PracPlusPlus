@@ -42,6 +42,52 @@ public:
     }
 
     /**
+     * Конструктор, создающий матрицу из нулей.
+     */
+    static Matrix<rows, columns, T> zeros()
+    {
+        Matrix<rows, columns, T> result{};
+        for (int i = 1; i < rows + 1; ++i)
+        {
+            for (int j = 1; j < columns + 1; ++j)
+            {
+                result.set(i, j, T(0, 1));
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Конструктор, создающий матрицу из единиц.
+     */
+    static Matrix<rows, columns, T> ones()
+    {
+        Matrix<rows, columns, T> result{};
+        for (int i = 1; i < rows + 1; ++i)
+        {
+            for (int j = 1; j < columns + 1; ++j)
+            {
+                result.set(i, j, T(1));
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Конструктор, создающий единичную матрицу.
+     */
+    static Matrix<rows, columns, T> eye()
+    {
+        Matrix<rows, columns, T> result{};
+        int size = std::min(rows, columns);
+        for (int i = 1; i < size + 1; ++i)
+        {
+            result.set(i, i, T(1));
+        }
+        return result;
+    }
+
+    /**
      * Установка значения элемента матрицы по заданным индексам.
      * Если значение меньше epsilon, элемент удаляется из словаря.
      * @param row Индекс строки.
@@ -90,5 +136,102 @@ public:
             }
         }
         return result;
+    }
+
+    /**
+     * Перегрузка оператора вычитания для матриц с проверкой совпадения размеров и возможности приведения типов чисел.
+     * @tparam OtherT Тип чисел во второй матрице.
+     * @param other Вычитаемая матрица.
+     * @return Новая матрица, являющаяся результатом вычитания.
+     */
+    template <typename OtherT>
+    Matrix<rows, columns, T> operator-(const Matrix<rows, columns, OtherT> &other)
+    {
+        static_assert(std::is_convertible<OtherT, T>::value, "Invalid type conversion");
+        Matrix<rows, columns, T> result;
+        for (int i = 1; i < rows + 1; ++i)
+        {
+            for (int j = 1; j < columns + 1; ++j)
+            {
+                T value = at(i, j) - static_cast<T>(other.at(i, j));
+                result.set(i, j, value);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Перегрузка оператора умножения для матриц с проверкой совпадения размеров и возможности приведения типов чисел.
+     * @tparam OtherColumns Количество столбцов во второй матрице.
+     * @tparam OtherT Тип чисел во второй матрице.
+     * @param other Матрица для умножения.
+     * @return Новая матрица, являющаяся результатом умножения.
+     */
+    template <int OtherColumns, typename OtherT>
+    Matrix<rows, OtherColumns, T> operator*(const Matrix<columns, OtherColumns, OtherT> &other)
+    {
+        static_assert(std::is_convertible<OtherT, T>::value, "Invalid type conversion");
+
+        Matrix<rows, OtherColumns, T> result;
+        for (int i = 1; i < rows + 1; ++i)
+        {
+            for (int k = 1; k < OtherColumns + 1; ++k)
+            {
+                T sum = T();
+                for (int j = 1; j < columns + 1; ++j)
+                {
+                    sum += at(i, j) * static_cast<T>(other.at(j, k));
+                }
+                result.set(i, k, sum);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Перегрузка оператора унарного минуса для инверсии знака всех элементов матрицы.
+     * @return Новая матрица, являющаяся результатом инверсии знака всех элементов текущей матрицы.
+     */
+    Matrix<rows, columns, T> operator-() const
+    {
+        Matrix<rows, columns, T> result(*this);
+        for (auto &pair : result.data)
+        {
+            pair.second = -pair.second;
+        }
+        return result;
+    }
+
+    /**
+     * Перегрузка оператора транспонирования для возврата транспонированной матрицы.
+     * @return Новая матрица, являющаяся транспонированной текущей матрицей.
+     */
+    Matrix<columns, rows, T> operator~() const
+    {
+        Matrix<columns, rows, T> result;
+        for (int i = 1; i < columns + 1; ++i)
+        {
+            for (int j = 1; j < rows + 1; ++j)
+            {
+                result.set(i, j, at(j, i));
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Оператор () для доступа к элементу матрицы по индексам.
+     * @param row Индекс строки.
+     * @param column Индекс столбца.
+     * @return Ссылка на элемент матрицы в позиции (row, column).
+     * @throws std::out_of_range Если индексы выходят за пределы размеров матрицы.
+     */
+    T &operator()(int row, int column)
+    {
+        if (row < 1 || row >= rows + 1 || column < 1 || column >= columns + 1)
+        {
+            throw std::out_of_range("Matrix indices out of range");
+        }
+        return data[std::make_pair(row, column)];
     }
 };

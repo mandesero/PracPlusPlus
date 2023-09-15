@@ -6,19 +6,19 @@
 
 #IncludeRegexTransform: 
 
-/home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/main.cpp
+/home/mandesero_wsl/ASVK/PracPlusPlus/SparceMatrixKit/main.cpp
 iostream
 -
 stdint.h
-/home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/stdint.h
+/home/mandesero_wsl/ASVK/PracPlusPlus/SparceMatrixKit/stdint.h
 Rational.h
-/home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/Rational.h
+/home/mandesero_wsl/ASVK/PracPlusPlus/SparceMatrixKit/Rational.h
 Complex.h
-/home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/Complex.h
+/home/mandesero_wsl/ASVK/PracPlusPlus/SparceMatrixKit/Complex.h
 Vector.h
-/home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/Vector.h
+/home/mandesero_wsl/ASVK/PracPlusPlus/SparceMatrixKit/Vector.h
 Matrix.h
-/home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/Matrix.h
+/home/mandesero_wsl/ASVK/PracPlusPlus/SparceMatrixKit/Matrix.h
 
 src/Complex.h
 iostream

@@ -1,0 +1,7 @@
+src/cmake_install.cmake
+src/CMakeFiles/*
+src/lib*
+cmake_install.cmake
+cmake_install copy.cmake
+CMakeCache.txt
+SparceMatrixKit

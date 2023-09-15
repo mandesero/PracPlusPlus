@@ -6,5 +6,5 @@ CXX_FLAGS =   -std=gnu++2a
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/mandesero_nb/ASVK/PracPlusPlus/SparceMatrixKit/src 
+CXX_INCLUDES = -I/home/mandesero_wsl/ASVK/PracPlusPlus/SparceMatrixKit/src 
 

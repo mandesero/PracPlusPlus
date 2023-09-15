@@ -87,10 +87,10 @@ public:
 
     operator int() const
     {
-        T rat_to_num = this->numtor / this->dentor;
-        if (!(std::numeric_limits<int>::min() <= rat_to_num && rat_to_num <= std::numeric_limits<int>::max()))
+        T rat_to_int = this->numtor / this->dentor;
+        if (!(std::numeric_limits<int>::min() <= rat_to_int && rat_to_int <= std::numeric_limits<int>::max()))
             throw std::overflow_error("Overflow occurred during conversion to int");
-        return static_cast<int>(rat_to_num);
+        return static_cast<int>(rat_to_int);
     }
 
     Rational_number<T> &operator=(const Rational_number<T> &other)
@@ -119,7 +119,7 @@ public:
 
         T numerator = this->numtor * static_cast<T>(other.getDentor()) + static_cast<T>(other.getNumtor()) * this->dentor;
         T denominator = this->dentor * static_cast<T>(other.getDentor());
-        if (numerator == 0)
+        if (numerator == 0) 
             return Rational_number<T>(0, 1);
         return Rational_number<T>(numerator, denominator);
     }
@@ -376,6 +376,6 @@ public:
 
     std::string to_string() const
     {
-        return std::to_string((int)(this->numtor)) + '/' + std::to_string((int)(this->dentor));
+        return std::to_string(this->numtor) + '/' + std::to_string(this->dentor);
     }
 };
