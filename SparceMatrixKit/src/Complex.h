@@ -3,6 +3,10 @@
 #include <iostream>
 #include <type_traits>
 #include <cmath>
+#include "Rational.h"
+
+template <typename T>
+class Rational_number;
 
 template <typename T = double, typename U = T>
 class Complex_number
@@ -16,9 +20,9 @@ protected:
     U imag;
 
 private:
+public:
     Complex_number(T re, U im) : real(re), imag(im) {}
 
-public:
     Complex_number() : real(0), imag(0) {}
 
     Complex_number(long int re) : real(static_cast<T>(re)) {}
@@ -72,29 +76,30 @@ public:
 
     Complex_number(const Complex_number &other) : real(other.getReal()), imag(other.getImag()) {}
 
-    // operator + and +=
-    template <typename T1, typename T2>
-    Complex_number<T, U> operator+(const Complex_number<T1, T2> &other) const
+    // operator + and += and ++
+
+    // сложение с комплексными
+    Complex_number<T, U> operator+(const Complex_number<T, U> &other) const
     {
-        T re = this->real + static_cast<T>(other.getReal());
-        U im = this->imag + static_cast<U>(other.getImag());
+        T re = this->real + other.getReal();
+        U im = this->imag + other.getImag();
         return Complex_number<T, U>(re, im);
     }
 
+    Complex_number<T, U> &operator+=(const Complex_number<T, U> &other)
+    {
+        this->real += other.getReal();
+        this->imag += other.getImag();
+        return *this;
+    }
+
+    // сложение с стандратными типами
     template <typename T1>
     Complex_number<T, U> operator+(const T1 &num) const
     {
         T re = this->real + static_cast<T>(num);
         U im = this->imag;
         return Complex_number<T, U>(re, im);
-    }
-
-    template <typename T1, typename T2>
-    Complex_number<T, U> &operator+=(const Complex_number<T1, T2> &other)
-    {
-        this->real += static_cast<T>(other.getReal());
-        this->imag += static_cast<U>(other.getImag());
-        return *this;
     }
 
     template <typename T1>
@@ -104,6 +109,14 @@ public:
         return *this;
     }
 
+    // сложение с рациональными
+    template <typename OtherT>
+    Complex_number<T, U> operator+(const Rational_number<OtherT> &other) const
+    {
+        return Complex_number<T, U>(this->real + static_cast<double>(other.getNumtor()) / other.getDentor(), this->imag);
+    }
+
+    // ++
     Complex_number<T, U> &operator++()
     {
         this->real += static_cast<T>(1);
@@ -117,65 +130,75 @@ public:
     }
 
     // operator -
-    template <typename T1, typename T2>
-    Complex_number<T, U> operator-(const Complex_number<T1, T2> &other) const
+
+    // вычитание комплексных
+    Complex_number<T, U> operator-(const Complex_number<T, U> &other) const
     {
-        T re = this->real - static_cast<T>(other.getReal());
-        U im = this->imag - static_cast<U>(other.getImag());
+        T re = this->real - other.getReal();
+        U im = this->imag - other.getImag();
         return Complex_number<T, U>(re, im);
     }
 
+    Complex_number<T, U> &operator-=(const Complex_number<T, U> &other)
+    {
+        this->real -= other.getReal();
+        this->imag -= other.getImag();
+        return *this;
+    }
+
+    // вычитание стандратных типов
     template <typename T1>
-    Complex_number<T, U> operator-(const T1 num) const
+    Complex_number<T, U> operator-(const T1 &num) const
     {
         T re = this->real - static_cast<T>(num);
         U im = this->imag;
         return Complex_number<T, U>(re, im);
     }
 
-    template <typename T1, typename T2>
-    Complex_number<T, U> &operator-=(const Complex_number<T1, T2> &other)
-    {
-        this->real -= static_cast<T>(other.getReal());
-        this->imag -= static_cast<U>(other.getImag());
-        return *this;
-    }
-
     template <typename T1>
-    Complex_number<T, U> &operator-=(const T1 num)
+    Complex_number<T, U> &operator-=(const T1 &num)
     {
         this->real -= static_cast<T>(num);
         return *this;
     }
 
+    // вычитание рациональных
+    template <typename OtherT>
+    Complex_number<T, U> operator-(const Rational_number<OtherT> &other) const
+    {
+        return Complex_number<T, U>(this->real - static_cast<double>(other.getNumtor()) / other.getDentor(), this->imag);
+    }
+
+    // унарный минус
     Complex_number<T, U> operator-() const
     {
         return Complex_number<T, U>(-this->real, -this->imag);
     }
 
     // operator *
-    template <typename T1, typename T2>
-    Complex_number<T, U> operator*(const Complex_number<T1, T2> &other) const
+
+    // умножение на комплексные
+    Complex_number<T, U> operator*(const Complex_number<T, U> &other) const
     {
-        T re = this->real * static_cast<T>(other.getReal()) - static_cast<T>(this->imag) * static_cast<T>(other.getImag());
-        U im = this->real * static_cast<U>(other.getImag()) + static_cast<U>(this->imag) * static_cast<U>(other.getReal());
+        T re = this->real * other.getReal() - this->imag * other.getImag();
+        U im = this->real * other.getImag() + this->imag * other.getReal();
         return Complex_number<T, U>(re, im);
     }
 
+    Complex_number<T, U> &operator*=(const Complex_number<T, U> &other)
+    {
+        this->real = this->real * other.getReal() - this->imag * other.getImag();
+        this->imag = this->real * other.getImag() + this->imag * other.getReal();
+        return *this;
+    }
+
+    // умножение на стандартные типы
     template <typename T1>
     Complex_number<T, U> operator*(const T1 num) const
     {
         T re = this->real * static_cast<T>(num);
         U im = this->imag * static_cast<U>(num);
         return Complex_number<T, U>(re, im);
-    }
-
-    template <typename T1, typename T2>
-    Complex_number<T, U> &operator*=(const Complex_number<T1, T2> &other)
-    {
-        this->real = this->real * static_cast<T>(other.getReal()) - static_cast<T>(this->imag) * static_cast<T>(other.getImag());
-        this->imag = this->real * static_cast<U>(other.getImag()) + static_cast<U>(this->imag) * static_cast<U>(other.getReal());
-        return *this;
     }
 
     template <typename T1>
@@ -186,19 +209,42 @@ public:
         return *this;
     }
 
+    // operator * на Rational
+
+    template <typename OtherT>
+    Complex_number<T, U> operator*(const Rational_number<OtherT> &other) const
+    {
+        T re = this->real * double(other);
+        U im = this->imag * double(other);
+        return Complex_number<T, U>(re, im);
+    }
+
     // operator /
-    template <typename T1, typename T2>
-    Complex_number<T, U> operator/(const Complex_number<T1, T2> &other) const
+
+    // деление на комплексные
+    Complex_number<T, U> operator/(const Complex_number<T, U> &other) const
     {
         if (other.getReal() == 0 && other.getImag() == 0)
             throw std::logic_error("Cant devide by zero");
-        T re = this->real * static_cast<T>(other.getReal()) + static_cast<T>(this->imag) * static_cast<T>(other.getImag());
-        U im = this->real * static_cast<U>(other.getImag()) - static_cast<U>(this->imag) * static_cast<U>(other.getReal());
-        T tmp1 = this->real * this->real + static_cast<T>(this->imag) * static_cast<T>(this->imag);
-        U tmp2 = this->imag * this->imag + static_cast<U>(this->real) * static_cast<U>(this->real);
-        return Complex_number<T, U>(re / tmp1, im / tmp2);
+        T re = this->real * other.getReal() + this->imag * other.getImag();
+        U im = this->real * other.getImag() - this->imag * other.getReal();
+        T tmp = this->real * this->real + this->imag * this->imag;
+        return Complex_number<T, U>(re / tmp, im / tmp);
     }
 
+    Complex_number<T, U> &operator/=(const Complex_number<T, U> &other)
+    {
+        if (other.getReal() == 0 && other.getImag() == 0)
+            throw std::logic_error("Cant devide by zero");
+        T re = this->real * other.getReal() + this->imag * other.getImag();
+        U im = this->real * other.getImag() - this->imag * other.getReal();
+        T tmp = this->real * this->real + this->imag * this->imag;
+        this->real = re / tmp;
+        this->imag = im / tmp;
+        return *this;
+    }
+
+    // деление на стандартные типы
     template <typename T1>
     Complex_number<T, U> operator/(const T1 num) const
     {
@@ -209,20 +255,6 @@ public:
         return Complex_number<T, U>(re, im);
     }
 
-    template <typename T1, typename T2>
-    Complex_number<T, U> &operator/=(const Complex_number<T1, T2> &other)
-    {
-        if (other.getReal() == 0 && other.getImag() == 0)
-            throw std::logic_error("Cant devide by zero");
-        T re = this->real * static_cast<T>(other.getReal()) + static_cast<T>(this->imag) * static_cast<T>(other.getImag());
-        U im = this->real * static_cast<U>(other.getImag()) - static_cast<U>(this->imag) * static_cast<U>(other.getReal());
-        T tmp1 = this->real * this->real + static_cast<T>(this->imag) * static_cast<T>(this->imag);
-        U tmp2 = this->imag * this->imag + static_cast<U>(this->real) * static_cast<U>(this->real);
-        this->real = re / tmp1;
-        this->imag = im / tmp2;
-        return *this;
-    }
-
     template <typename T1>
     Complex_number<T, U> &operator/=(const T1 num)
     {
@@ -230,6 +262,16 @@ public:
             throw std::logic_error("Cant devide by zero");
         this->real /= static_cast<T>(num);
         this->imag /= static_cast<U>(num);
+        return *this;
+    }
+
+    // деление на рациональные
+
+    template <typename OtherT>
+    Complex_number<T, U> operator/(const Rational_number<OtherT> &other)
+    {
+        this->real /= static_cast<T>(double(other)); 
+        this->imag /= static_cast<T>(double(other));
         return *this;
     }
 

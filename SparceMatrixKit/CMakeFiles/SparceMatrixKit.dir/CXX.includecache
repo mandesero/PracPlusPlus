@@ -27,6 +27,8 @@ type_traits
 -
 cmath
 -
+Rational.h
+src/Rational.h
 
 src/Matrix.h
 iostream
@@ -47,6 +49,8 @@ type_traits
 -
 cmath
 -
+Complex.h
+src/Complex.h
 
 src/Vector.h
 iostream

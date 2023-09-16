@@ -97,10 +97,10 @@ src/clean: src/CMakeFiles/Rational.dir/clean
 # Target rules for target CMakeFiles/SparceMatrixKit.dir
 
 # All Build rule for target.
+CMakeFiles/SparceMatrixKit.dir/all: src/CMakeFiles/Vector.dir/all
 CMakeFiles/SparceMatrixKit.dir/all: src/CMakeFiles/Complex.dir/all
 CMakeFiles/SparceMatrixKit.dir/all: src/CMakeFiles/Rational.dir/all
 CMakeFiles/SparceMatrixKit.dir/all: src/CMakeFiles/Matrix.dir/all
-CMakeFiles/SparceMatrixKit.dir/all: src/CMakeFiles/Vector.dir/all
 	$(MAKE) -f CMakeFiles/SparceMatrixKit.dir/build.make CMakeFiles/SparceMatrixKit.dir/depend
 	$(MAKE) -f CMakeFiles/SparceMatrixKit.dir/build.make CMakeFiles/SparceMatrixKit.dir/build
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/mandesero_wsl/ASVK/PracPlusPlus/SparceMatrixKit/CMakeFiles --progress-num=7,8 "Built target SparceMatrixKit"

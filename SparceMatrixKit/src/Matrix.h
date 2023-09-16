@@ -21,27 +21,6 @@ public:
     Matrix(double epsilon = 0) : eps(epsilon) {}
 
     /**
-     * Получение значения элемента матрицы по заданным индексам.
-     * Если элемент не найден, возвращается нулевое значение типа T.
-     * @param row Индекс строки.
-     * @param column Индекс столбца.
-     * @return Значение элемента матрицы.
-     */
-    const T &at(int row, int column) const
-    {
-        auto it = data.find(std::make_pair(row, column));
-        if (it == data.end())
-        {
-            static const T zero;
-            return zero;
-        }
-        else
-        {
-            return it->second;
-        }
-    }
-
-    /**
      * Конструктор, создающий матрицу из нулей.
      */
     static Matrix<rows, columns, T> zeros()
@@ -88,8 +67,29 @@ public:
     }
 
     /**
+     * Получение значения элемента матрицы по заданным индексам.
+     * Если элемент не найден, возвращается нулевое значение типа T.
+     * @param row Индекс строки.
+     * @param column Индекс столбца.
+     * @return Значение элемента матрицы.
+     */
+    const T &at(int row, int column) const
+    {
+        auto it = data.find(std::make_pair(row, column));
+        if (it == data.end())
+        {
+            static const T zero;
+            return zero;
+        }
+        else
+        {
+            return it->second;
+        }
+    }
+
+    /**
      * Установка значения элемента матрицы по заданным индексам.
-     * Если значение меньше epsilon, элемент удаляется из словаря.
+     * Если значение меньше epsilon, элемент не добавляется в словарь.
      * @param row Индекс строки.
      * @param column Индекс столбца.
      * @param value Значение элемента матрицы.
@@ -122,16 +122,14 @@ public:
      * @param other Матрица для сложения.
      * @return Новая матрица, являющаяся результатом сложения.
      */
-    template <typename OtherT>
-    Matrix<rows, columns, T> operator+(const Matrix<rows, columns, OtherT> &other)
+    Matrix<rows, columns, T> operator+(const Matrix<rows, columns, T> &other)
     {
-        static_assert(std::is_convertible<OtherT, T>::value, "Invalid type conversion");
         Matrix<rows, columns, T> result;
         for (int i = 1; i < rows + 1; ++i)
         {
             for (int j = 1; j < columns + 1; ++j)
             {
-                T value = at(i, j) + static_cast<T>(other.at(i, j));
+                T value = at(i, j) + other.at(i, j);
                 result.set(i, j, value);
             }
         }
@@ -144,16 +142,14 @@ public:
      * @param other Вычитаемая матрица.
      * @return Новая матрица, являющаяся результатом вычитания.
      */
-    template <typename OtherT>
-    Matrix<rows, columns, T> operator-(const Matrix<rows, columns, OtherT> &other)
+    Matrix<rows, columns, T> operator-(const Matrix<rows, columns, T> &other)
     {
-        static_assert(std::is_convertible<OtherT, T>::value, "Invalid type conversion");
         Matrix<rows, columns, T> result;
         for (int i = 1; i < rows + 1; ++i)
         {
             for (int j = 1; j < columns + 1; ++j)
             {
-                T value = at(i, j) - static_cast<T>(other.at(i, j));
+                T value = at(i, j) - other.at(i, j);
                 result.set(i, j, value);
             }
         }
@@ -167,11 +163,9 @@ public:
      * @param other Матрица для умножения.
      * @return Новая матрица, являющаяся результатом умножения.
      */
-    template <int OtherColumns, typename OtherT>
-    Matrix<rows, OtherColumns, T> operator*(const Matrix<columns, OtherColumns, OtherT> &other)
+    template <int OtherColumns>
+    Matrix<rows, OtherColumns, T> operator*(const Matrix<columns, OtherColumns, T> &other)
     {
-        static_assert(std::is_convertible<OtherT, T>::value, "Invalid type conversion");
-
         Matrix<rows, OtherColumns, T> result;
         for (int i = 1; i < rows + 1; ++i)
         {
@@ -180,7 +174,7 @@ public:
                 T sum = T();
                 for (int j = 1; j < columns + 1; ++j)
                 {
-                    sum += at(i, j) * static_cast<T>(other.at(j, k));
+                    sum += at(i, j) * other.at(j, k);
                 }
                 result.set(i, k, sum);
             }
@@ -226,12 +220,12 @@ public:
      * @return Ссылка на элемент матрицы в позиции (row, column).
      * @throws std::out_of_range Если индексы выходят за пределы размеров матрицы.
      */
-    T &operator()(int row, int column)
+    const T &operator()(int row, int column) const
     {
-        if (row < 1 || row >= rows + 1 || column < 1 || column >= columns + 1)
+        if (row < 1 || row > rows + 1 || column < 1 || column > columns + 1)
         {
             throw std::out_of_range("Matrix indices out of range");
         }
-        return data[std::make_pair(row, column)];
+        return this->at(row, column);
     }
 };
