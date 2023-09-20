@@ -5,7 +5,162 @@
 #include <cmath>
 #include <map>
 #include <utility>
+#include <memory>
+#include <vector>
 
+#include "Vector.h"
+template <int len, typename T>
+class Vector;
+
+struct Matrix_coords
+{
+    int r1; /**< Начальная строка среза. Если -1, то с начала матрицы. */
+    int c1; /**< Начальный столбец среза. Если -1, то с начала матрицы. */
+    int r2; /**< Конечная строка среза. Если -1, то до конца матрицы. */
+    int c2; /**< Конечный столбец среза. Если -1, то до конца матрицы. */
+
+    Matrix_coords(int r1, int c1, int r2, int c2) : r1(r1), c1(c1), r2(r2), c2(c2) {}
+
+    Matrix_coords(int r1, int c1) : r1(r1), c1(c1), r2(r1), c2(c1) {}
+};
+
+struct Matrix_row_coord
+{
+    int row;
+    Matrix_row_coord(int row) : row(row) {}
+};
+
+struct Matrix_column_coord
+{
+    int column;
+    Matrix_column_coord(int column) : column(column) {}
+};
+
+template <int rows, int columns, typename T>
+class Matrix;
+
+template <int rows, int columns, typename T>
+class Matrix_proxy;
+
+template <int rows, int columns, typename T>
+class Matrix_proxy
+{
+private:
+    Matrix<rows, columns, T> *matrix;
+    int row;
+    int column;
+    Matrix_coords coords;
+
+public:
+    Matrix_proxy(Matrix<rows, columns, T> *matrix, int row, int column, Matrix_coords coords) : matrix(matrix), row(row), column(column), coords(coords) {}
+
+    auto &operator[](int index)
+    {
+        if (column != -1 && (index < 1 || index > rows))
+            throw std::logic_error("Index out of range");
+        if (row != -1 && (index < 1 || index > columns))
+            throw std::logic_error("Index out of range");
+        return column == -1 ? matrix->at(row, index) : matrix->at(index, column);
+    }
+
+    auto &operator[](std::pair<int, int> idxs)
+    {
+        if (idxs.first < 1 || idxs.first > coords.c2 - 1 || idxs.second < 1 || idxs.second > coords.r2 - 1)
+            throw std::logic_error("Index out of range");
+
+        return matrix->at(idxs.first + coords.r1 - 1, idxs.second + coords.c1 - 1);
+    }
+
+    std::string to_string() const
+    {
+        std::string result;
+        if (column != -1)
+        {
+            for (int i = 1; i <= rows; ++i)
+                result += matrix->at(i, column).to_string() + '\n';
+        }
+        else if (row != -1)
+        {
+            for (int i = 1; i <= columns; ++i)
+                result += matrix->at(row, i).to_string() + ' ';
+        }
+        else
+        {
+            int c1 = coords.c1;
+            int c2 = coords.c2;
+            int r1 = coords.r1;
+            int r2 = coords.r2;
+
+            for (int i = c1; i <= c2; ++i)
+            {
+                for (int j = r1; j <= r2; ++j)
+                    result += matrix->at(i, j).to_string() + " ";
+                result += "\n";
+            }
+        }
+        return result;
+    }
+
+    void delete_ptr()
+    {
+        matrix = nullptr;
+    }
+
+    auto create_vector()
+    {
+        if (column == -1 && row == -1)
+            throw std::logic_error("Not a vector");
+
+        if (column != -1)
+        {
+            Vector<columns, T> result;
+            for (int i = 1; i <= rows; ++i)
+                result[i] += matrix->at(i, column);
+            return result;
+        }
+        else
+        {
+            Vector<rows, T> result;
+            for (int i = 1; i <= columns; ++i)
+                result[i] = matrix->at(row, i);
+            return result;
+        }
+    }
+
+    Matrix_proxy<rows, columns, T> operator[](Matrix_coords &&new_coords)
+    {
+        int c1 = new_coords.c1;
+        int c2 = new_coords.c2;
+        int r1 = new_coords.r1;
+        int r2 = new_coords.r2;
+
+        if (c1 == -1 || r1 == -1) {
+            c1 = 1;
+            r1 = 1;
+        }
+        if (r2 == -1 || c2 == -1) {
+            r2 = rows;
+            c2 = columns;
+        }
+
+        Matrix_coords tmp(
+            std::min(r1, coords.r1), std::min(c1, coords.c1),
+            std::max(r2, coords.r2), std::max(c2, coords.c2)
+        );
+        std::cout << tmp.r1 << tmp.c1 << tmp.r2 << tmp.c2 << std::endl;
+
+        auto new_proxy = Matrix_proxy<rows, columns, T>(matrix, -1, -1, tmp);
+        matrix->add_proxy(new_proxy);
+        return new_proxy;
+    }
+};
+
+/**
+ * @brief Класс для представления матрицы.
+ * @tparam rows Количество строк в матрице.
+ * @tparam columns Количество столбцов в матрице.
+ * @tparam T Тип элементов матрицы.
+ */
 template <int rows, int columns, typename T>
 class Matrix
 {
@@ -13,15 +168,28 @@ protected:
     std::map<std::pair<int, int>, T> data; /**< Словарь для хранения элементов матрицы */
     double eps;                            /**< Пороговое значение для признания числа нулевым */
 
+    std::vector<Matrix_proxy<rows, columns, T>> proxies;
+
 public:
+    void add_proxy(Matrix_proxy<rows, columns, T> &other)
+    {
+        proxies.push_back(other);
+    }
+
+    ~Matrix()
+    {
+        for (auto &proxy : proxies)
+            proxy.delete_ptr();
+    }
+
     /**
-     * Конструктор класса Matrix.
+     * @brief Конструктор класса Matrix.
      * @param epsilon Пороговое значение для признания числа нулевым. По умолчанию равно 0.
      */
     Matrix(double epsilon = 0) : eps(epsilon) {}
 
     /**
-     * Конструктор, создающий матрицу из нулей.
+     * @brief Конструктор, создающий матрицу из нулей.
      */
     static Matrix<rows, columns, T> zeros()
     {
@@ -37,7 +205,7 @@ public:
     }
 
     /**
-     * Конструктор, создающий матрицу из единиц.
+     * @brief Конструктор, создающий матрицу из единиц.
      */
     static Matrix<rows, columns, T> ones()
     {
@@ -53,7 +221,7 @@ public:
     }
 
     /**
-     * Конструктор, создающий единичную матрицу.
+     * @brief Конструктор, создающий единичную матрицу.
      */
     static Matrix<rows, columns, T> eye()
     {
@@ -67,8 +235,7 @@ public:
     }
 
     /**
-     * Получение значения элемента матрицы по заданным индексам.
-     * Если элемент не найден, возвращается нулевое значение типа T.
+     * @brief Получение значения элемента матрицы по заданным индексам. Если элемент не найден, возвращается нулевое значение типа T.
      * @param row Индекс строки.
      * @param column Индекс столбца.
      * @return Значение элемента матрицы.
@@ -88,8 +255,7 @@ public:
     }
 
     /**
-     * Установка значения элемента матрицы по заданным индексам.
-     * Если значение меньше epsilon, элемент не добавляется в словарь.
+     * @brief Установка значения элемента матрицы по заданным индексам. Если значение меньше epsilon, элемент не добавляется в словарь.
      * @param row Индекс строки.
      * @param column Индекс столбца.
      * @param value Значение элемента матрицы.
@@ -101,7 +267,7 @@ public:
     }
 
     /**
-     * Возвращает строковое представление матрицы.
+     * @brief Возвращает строковое представление матрицы.
      * @return Строковое представление матрицы.
      */
     std::string to_string() const
@@ -117,7 +283,7 @@ public:
     }
 
     /**
-     * Перегрузка оператора сложения для матриц с проверкой совпадения размеров и возможности приведения типов чисел.
+     * @brief Перегрузка оператора сложения для матриц с проверкой совпадения размеров и возможности приведения типов чисел.
      * @tparam OtherT Тип чисел во второй матрице.
      * @param other Матрица для сложения.
      * @return Новая матрица, являющаяся результатом сложения.
@@ -137,7 +303,7 @@ public:
     }
 
     /**
-     * Перегрузка оператора вычитания для матриц с проверкой совпадения размеров и возможности приведения типов чисел.
+     * @brief Перегрузка оператора вычитания для матриц с проверкой совпадения размеров и возможности приведения типов чисел.
      * @tparam OtherT Тип чисел во второй матрице.
      * @param other Вычитаемая матрица.
      * @return Новая матрица, являющаяся результатом вычитания.
@@ -157,7 +323,7 @@ public:
     }
 
     /**
-     * Перегрузка оператора умножения для матриц с проверкой совпадения размеров и возможности приведения типов чисел.
+     * @brief Перегрузка оператора умножения для матриц с проверкой совпадения размеров и возможности приведения типов чисел.
      * @tparam OtherColumns Количество столбцов во второй матрице.
      * @tparam OtherT Тип чисел во второй матрице.
      * @param other Матрица для умножения.
@@ -183,7 +349,7 @@ public:
     }
 
     /**
-     * Перегрузка оператора унарного минуса для инверсии знака всех элементов матрицы.
+     * @brief Перегрузка оператора унарного минуса для инверсии знака всех элементов матрицы.
      * @return Новая матрица, являющаяся результатом инверсии знака всех элементов текущей матрицы.
      */
     Matrix<rows, columns, T> operator-() const
@@ -197,7 +363,7 @@ public:
     }
 
     /**
-     * Перегрузка оператора транспонирования для возврата транспонированной матрицы.
+     * @brief Перегрузка оператора транспонирования для возврата транспонированной матрицы.
      * @return Новая матрица, являющаяся транспонированной текущей матрицей.
      */
     Matrix<columns, rows, T> operator~() const
@@ -214,7 +380,7 @@ public:
     }
 
     /**
-     * Оператор () для доступа к элементу матрицы по индексам.
+     * @brief Оператор () для доступа к элементу матрицы по индексам.
      * @param row Индекс строки.
      * @param column Индекс столбца.
      * @return Ссылка на элемент матрицы в позиции (row, column).
@@ -227,5 +393,72 @@ public:
             throw std::out_of_range("Matrix indices out of range");
         }
         return this->at(row, column);
+    }
+
+    /**
+     * @brief Конструктор перемещения матрицы.
+     * @param other R-value ссылка на другой объект класса Matrix.
+     */
+    Matrix(Matrix &&other) noexcept : data(std::move(other.data)), eps(std::move(other.eps)) {}
+
+    /**
+     * @brief Конструктор копирования матрицы.
+     * @param other Константная ссылка на другой объект класса Matrix.
+     */
+    Matrix(const Matrix &other) : data(other.data), eps(other.eps) {}
+
+    /**
+     * @brief Оператор присваивания.
+     * @param other Константная ссылка на другой объект класса Matrix.
+     * @return Ссылка на текущий объект после присваивания.
+     */
+    Matrix &operator=(const Matrix &other)
+    {
+        if (this == &other)
+            return *this;
+
+        data = other.data;
+        eps = other.eps;
+        return *this;
+    }
+
+    /**
+     * @brief Оператор перемещения.
+     * @param other R-value ссылка на другой объект класса Matrix.
+     * @return Ссылка на текущий объект после перемещения.
+     */
+    Matrix &operator=(Matrix &&other) noexcept
+    {
+        if (this == &other)
+            return *this;
+
+        data = std::move(other.data);
+        eps = std::move(other.eps);
+        return *this;
+    }
+
+    auto &operator[](std::pair<int, int> coords)
+    {
+        return this->data[coords];
+    }
+
+    Matrix_proxy<rows, columns, T> operator[](Matrix_coords &&coords)
+    {
+        proxies.push_back(Matrix_proxy<rows, columns, T>(this, -1, -1, coords));
+        return proxies.back();
+    }
+
+    Matrix_proxy<rows, columns, T> operator[](Matrix_column_coord &&c)
+    {
+        Matrix_coords tmp(-1, -1);
+        proxies.push_back(Matrix_proxy<rows, columns, T>(this, -1, c.column, tmp));
+        return proxies.back();
+    }
+
+    Matrix_proxy<rows, columns, T> operator[](Matrix_row_coord &&r)
+    {
+        Matrix_coords tmp(-1, -1);
+        proxies.push_back(Matrix_proxy<rows, columns, T>(this, r.row, -1, tmp));
+        return proxies.back();
     }
 };

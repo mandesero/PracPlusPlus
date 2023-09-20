@@ -459,4 +459,8 @@ public:
     {
         return std::to_string(this->numtor) + '/' + std::to_string(this->dentor);
     }
+
+    Rational_number<T>& operator=(Rational_number<T>&& other) {
+        return *this;
+    }
 };

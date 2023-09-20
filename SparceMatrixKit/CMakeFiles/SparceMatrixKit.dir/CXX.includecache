@@ -41,6 +41,12 @@ map
 -
 utility
 -
+memory
+-
+vector
+-
+Vector.h
+src/Vector.h
 
 src/Rational.h
 iostream
@@ -61,4 +67,6 @@ cmath
 -
 map
 -
+Matrix.h
+src/Matrix.h
 

@@ -4,6 +4,7 @@
 #include <type_traits>
 #include <cmath>
 #include <map>
+#include "Matrix.h"
 
 template <int len, typename T>
 class Vector
@@ -230,5 +231,11 @@ public:
             result.set(i, value);
         }
         return result;
+    }
+
+    T& operator[](int index) {
+        if (index < 1 || index > len)
+            throw std::logic_error("Out of range");
+        return data[index];
     }
 };
