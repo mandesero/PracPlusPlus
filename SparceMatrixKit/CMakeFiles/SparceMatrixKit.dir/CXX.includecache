@@ -19,6 +19,12 @@ Vector.h
 /home/mandesero_wsl/ASVK/PracPlusPlus/SparceMatrixKit/Vector.h
 Matrix.h
 /home/mandesero_wsl/ASVK/PracPlusPlus/SparceMatrixKit/Matrix.h
+iostream
+-
+fstream
+-
+sstream
+-
 
 src/Complex.h
 iostream
@@ -69,4 +75,10 @@ map
 -
 Matrix.h
 src/Matrix.h
+fstream
+-
+sstream
+-
+stdexcept
+-
 

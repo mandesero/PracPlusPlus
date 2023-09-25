@@ -1,24 +1,32 @@
 #pragma once
 
 #include <iostream>
+
 #include <type_traits>
 #include <cmath>
 #include <map>
 #include "Matrix.h"
+#include <fstream>
+#include <sstream>
+#include <stdexcept>
 
-template <int len, typename T>
+template <typename T>
 class Vector
 {
 protected:
     std::map<int, T> data; /**< Словарь для хранения элементов вектора */
     double eps;            /**< Пороговое значение для признания числа нулевым */
+    int len;               /**< Длина вектора */
 
 public:
+    Vector() {}
+
     /**
      * Конструктор класса Vector.
+     * @param len
      * @param epsilon Пороговое значение для признания числа нулевым. По умолчанию равно 0.
      */
-    Vector(double epsilon = 0) : eps(epsilon) {}
+    Vector(int len, double epsilon = 0) : eps(epsilon), len(len) {}
 
     /**
      * Получение значения элемента вектора по заданным индексам.
@@ -52,6 +60,20 @@ public:
             data[index] = value;
     }
 
+    const int getLen() const
+    {
+        return len;
+    }
+
+    const double getEps() const
+    {
+        return eps;
+    }
+
+    const std::map<int, T> getData() const
+    {
+        return data;
+    }
     /**
      * Возвращает строковое представление вектора.
      * @return Строковое представление вектора.
@@ -88,9 +110,12 @@ public:
      * @return Новая вектор, являющаяся результатом сложения.
      */
 
-    Vector<len, T> operator+(const Vector<len, T> &other) const
+    Vector<T> operator+(const Vector<T> &other) const
     {
-        Vector<len, T> result;
+        if (len != other.getLen())
+            throw std::logic_error("Cannot add vectors of different sizes");
+
+        Vector<T> result(len);
         for (int i = 1; i < len + 1; ++i)
         {
             T value = at(i) + other.at(i);
@@ -107,10 +132,13 @@ public:
      * @return Новая вектор, являющаяся результатом сложения.
      */
     template <typename OtherT = double, typename OtherU = OtherT>
-    Vector<len, Complex_number<OtherT, OtherU>> operator+(const Vector<len, Complex_number<OtherT, OtherU>> &other) const
+    Vector<Complex_number<OtherT, OtherU>> operator+(const Vector<Complex_number<OtherT, OtherU>> &other) const
     {
+        if (len != other.getLen())
+            throw std::logic_error("Cannot add vectors of different sizes");
+
         static_assert(std::is_convertible<OtherT, T>::value, "Invalid type conversion");
-        Vector<len, Complex_number<OtherT, OtherU>> result;
+        Vector<Complex_number<OtherT, OtherU>> result(len);
         for (int i = 1; i < len + 1; ++i)
         {
             T value = at(i) + static_cast<T>(other.at(i));
@@ -126,10 +154,13 @@ public:
      * @return Новая вектор, являющаяся разностью двух вектров.
      */
     template <typename OtherT>
-    Vector<len, T> operator-(const Vector<len, OtherT> &other) const
+    Vector<T> operator-(const Vector<OtherT> &other) const
     {
+        if (len != other.getLen())
+            throw std::logic_error("Cannot add vectors of different sizes");
+
         static_assert(std::is_convertible<OtherT, T>::value, "Invalid type conversion");
-        Vector<len, T> result;
+        Vector<T> result(len);
         for (int i = 1; i < len + 1; ++i)
         {
             T value = at(i) - static_cast<T>(other.at(i));
@@ -146,10 +177,12 @@ public:
      * @return Новая вектор, являющаяся разностью двух вектров.
      */
     template <typename OtherT = double, typename OtherU = OtherT>
-    Vector<len, Complex_number<OtherT, OtherU>> operator-(const Vector<len, Complex_number<OtherT, OtherU>> &other) const
+    Vector<Complex_number<OtherT, OtherU>> operator-(const Vector<Complex_number<OtherT, OtherU>> &other) const
     {
+        if (len != other.getLen())
+            throw std::logic_error("Cannot add vectors of different sizes");
         static_assert(std::is_convertible<OtherT, T>::value, "Invalid type conversion");
-        Vector<len, Complex_number<OtherT, OtherU>> result;
+        Vector<Complex_number<OtherT, OtherU>> result(len);
         for (int i = 1; i < len + 1; ++i)
         {
             T value = at(i) - static_cast<T>(other.at(i));
@@ -165,9 +198,9 @@ public:
      * @return Новый вектор, являющийся произведением числа на вектор.
      */
     template <typename OtherT>
-    Vector<len, T> operator*(const OtherT &other) const
+    Vector<T> operator*(const OtherT &other) const
     {
-        Vector<len, T> result;
+        Vector<T> result(len);
         for (int i = 1; i < len + 1; ++i)
         {
             T value = at(i) * other;
@@ -184,9 +217,9 @@ public:
      * @return Новый вектор, являющийся произведением числа на вектор.
      */
     template <typename OtherT = double, typename OtherU = OtherT>
-    Vector<len, Complex_number<OtherT, OtherU>> operator*(const Complex_number<OtherT, OtherU> &other) const
+    Vector<Complex_number<OtherT, OtherU>> operator*(const Complex_number<OtherT, OtherU> &other) const
     {
-        Vector<len, Complex_number<OtherT, OtherU>> result;
+        Vector<Complex_number<OtherT, OtherU>> result(len);
         for (int i = 1; i < len + 1; ++i)
         {
             Complex_number<OtherT, OtherU> value = at(i) * other;
@@ -203,9 +236,9 @@ public:
      * @return Новый вектор, являющийся произведением числа на вектор.
      */
     template <typename OtherT>
-    Vector<len, T> operator/(const OtherT &other) const
+    Vector<T> operator/(const OtherT &other) const
     {
-        Vector<len, T> result;
+        Vector<T> result(len);
         for (int i = 1; i < len + 1; ++i)
         {
             T value = at(i) / other;
@@ -222,9 +255,9 @@ public:
      * @return Новый вектор, являющийся произведением числа на вектор.
      */
     template <typename OtherT = double, typename OtherU = OtherT>
-    Vector<len, Complex_number<OtherT, OtherU>> operator/(const Complex_number<OtherT, OtherU> &other) const
+    Vector<Complex_number<OtherT, OtherU>> operator/(const Complex_number<OtherT, OtherU> &other) const
     {
-        Vector<len, Complex_number<OtherT, OtherU>> result;
+        Vector<Complex_number<OtherT, OtherU>> result(len);
         for (int i = 1; i < len + 1; ++i)
         {
             Complex_number<OtherT, OtherU> value = at(i) / other;
@@ -233,9 +266,27 @@ public:
         return result;
     }
 
-    T& operator[](int index) {
+    T &operator[](int index)
+    {
         if (index < 1 || index > len)
             throw std::logic_error("Out of range");
         return data[index];
+    }
+
+    Vector<T> operator*(const Matrix<T> &other)
+    {
+        Vector<T> result(other.getColumns());
+
+        for (int j = 1; j < other.getColumns() + 1; ++j)
+        {
+            T sum = T();
+            for (int k = 1; k < len + 1; ++k)
+            {
+                sum += at(k) * other.at(k, j);
+            }
+            result.set(j, sum);
+        }
+
+        return result;
     }
 };

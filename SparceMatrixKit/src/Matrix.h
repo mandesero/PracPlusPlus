@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "Vector.h"
-template <int len, typename T>
+template <typename T>
 class Vector;
 
 struct Matrix_coords
@@ -36,23 +36,25 @@ struct Matrix_column_coord
     Matrix_column_coord(int column) : column(column) {}
 };
 
-template <int rows, int columns, typename T>
+template <typename T>
 class Matrix;
 
-template <int rows, int columns, typename T>
+template <typename T>
 class Matrix_proxy;
 
-template <int rows, int columns, typename T>
+template <typename T>
 class Matrix_proxy
 {
 private:
-    Matrix<rows, columns, T> *matrix;
+    Matrix<T> *matrix;
     int row;
     int column;
     Matrix_coords coords;
+    int columns;
+    int rows;
 
 public:
-    Matrix_proxy(Matrix<rows, columns, T> *matrix, int row, int column, Matrix_coords coords) : matrix(matrix), row(row), column(column), coords(coords) {}
+    Matrix_proxy(Matrix<T> *matrix, int rows, int columns, int row, int column, Matrix_coords coords) : matrix(matrix), columns(columns), row(row), rows(rows), column(column), coords(coords) {}
 
     auto &operator[](int index)
     {
@@ -113,43 +115,43 @@ public:
 
         if (column != -1)
         {
-            Vector<columns, T> result;
+            Vector<T> result(columns);
             for (int i = 1; i <= rows; ++i)
                 result[i] += matrix->at(i, column);
             return result;
         }
         else
         {
-            Vector<rows, T> result;
+            Vector<T> result(rows);
             for (int i = 1; i <= columns; ++i)
                 result[i] = matrix->at(row, i);
             return result;
         }
     }
 
-    Matrix_proxy<rows, columns, T> operator[](Matrix_coords &&new_coords)
+    Matrix_proxy<T> operator[](Matrix_coords &&new_coords)
     {
         int c1 = new_coords.c1;
         int c2 = new_coords.c2;
         int r1 = new_coords.r1;
         int r2 = new_coords.r2;
 
-        if (c1 == -1 || r1 == -1) {
+        if (c1 == -1 || r1 == -1)
+        {
             c1 = 1;
             r1 = 1;
         }
-        if (r2 == -1 || c2 == -1) {
+        if (r2 == -1 || c2 == -1)
+        {
             r2 = rows;
             c2 = columns;
         }
 
         Matrix_coords tmp(
             std::min(r1, coords.r1), std::min(c1, coords.c1),
-            std::max(r2, coords.r2), std::max(c2, coords.c2)
-        );
-        std::cout << tmp.r1 << tmp.c1 << tmp.r2 << tmp.c2 << std::endl;
+            std::max(r2, coords.r2), std::max(c2, coords.c2));
 
-        auto new_proxy = Matrix_proxy<rows, columns, T>(matrix, -1, -1, tmp);
+        auto new_proxy = Matrix_proxy<T>(matrix, rows, columns, -1, -1, tmp);
         matrix->add_proxy(new_proxy);
         return new_proxy;
     }
@@ -161,17 +163,20 @@ public:
  * @tparam columns Количество столбцов в матрице.
  * @tparam T Тип элементов матрицы.
  */
-template <int rows, int columns, typename T>
+template <typename T>
 class Matrix
 {
 protected:
     std::map<std::pair<int, int>, T> data; /**< Словарь для хранения элементов матрицы */
     double eps;                            /**< Пороговое значение для признания числа нулевым */
 
-    std::vector<Matrix_proxy<rows, columns, T>> proxies;
+    std::vector<Matrix_proxy<T>> proxies;
+
+    int rows;
+    int columns;
 
 public:
-    void add_proxy(Matrix_proxy<rows, columns, T> &other)
+    void add_proxy(Matrix_proxy<T> &other)
     {
         proxies.push_back(other);
     }
@@ -182,21 +187,31 @@ public:
             proxy.delete_ptr();
     }
 
+    const int getRows() const
+    {
+        return rows;
+    }
+
+    const int getColumns() const
+    {
+        return columns;
+    }
+
     /**
      * @brief Конструктор класса Matrix.
      * @param epsilon Пороговое значение для признания числа нулевым. По умолчанию равно 0.
      */
-    Matrix(double epsilon = 0) : eps(epsilon) {}
+    Matrix(int rows, int columns, double epsilon = 0) : eps(epsilon), rows(rows), columns(columns) {}
 
     /**
      * @brief Конструктор, создающий матрицу из нулей.
      */
-    static Matrix<rows, columns, T> zeros()
+    static Matrix<T> zeros(int size_1, int size_2)
     {
-        Matrix<rows, columns, T> result{};
-        for (int i = 1; i < rows + 1; ++i)
+        Matrix<T> result(size_1, size_2);
+        for (int i = 1; i < size_1 + 1; ++i)
         {
-            for (int j = 1; j < columns + 1; ++j)
+            for (int j = 1; j < size_2 + 1; ++j)
             {
                 result.set(i, j, T(0, 1));
             }
@@ -207,12 +222,12 @@ public:
     /**
      * @brief Конструктор, создающий матрицу из единиц.
      */
-    static Matrix<rows, columns, T> ones()
+    static Matrix<T> ones(int size_1, int size_2)
     {
-        Matrix<rows, columns, T> result{};
-        for (int i = 1; i < rows + 1; ++i)
+        Matrix<T> result(size_1, size_2);
+        for (int i = 1; i < size_1 + 1; ++i)
         {
-            for (int j = 1; j < columns + 1; ++j)
+            for (int j = 1; j < size_2 + 1; ++j)
             {
                 result.set(i, j, T(1));
             }
@@ -223,10 +238,10 @@ public:
     /**
      * @brief Конструктор, создающий единичную матрицу.
      */
-    static Matrix<rows, columns, T> eye()
+    static Matrix<T> eye(int size_1, int size_2)
     {
-        Matrix<rows, columns, T> result{};
-        int size = std::min(rows, columns);
+        Matrix<T> result(size_1, size_2);
+        int size = std::min(size_1, size_2);
         for (int i = 1; i < size + 1; ++i)
         {
             result.set(i, i, T(1));
@@ -288,9 +303,12 @@ public:
      * @param other Матрица для сложения.
      * @return Новая матрица, являющаяся результатом сложения.
      */
-    Matrix<rows, columns, T> operator+(const Matrix<rows, columns, T> &other)
+    Matrix<T> operator+(const Matrix<T> &other)
     {
-        Matrix<rows, columns, T> result;
+        if (rows != other.getRows() && columns != other.getColumns())
+            throw std::logic_error("Cannot add matrix with different sizes");
+        Matrix<T> result(rows, columns);
+
         for (int i = 1; i < rows + 1; ++i)
         {
             for (int j = 1; j < columns + 1; ++j)
@@ -308,9 +326,11 @@ public:
      * @param other Вычитаемая матрица.
      * @return Новая матрица, являющаяся результатом вычитания.
      */
-    Matrix<rows, columns, T> operator-(const Matrix<rows, columns, T> &other)
+    Matrix<T> operator-(const Matrix<T> &other)
     {
-        Matrix<rows, columns, T> result;
+        if (rows != other.getRows() && columns != other.getColumns())
+            throw std::logic_error("Cannot sub matrix with different sizes");
+        Matrix<T> result(rows, columns);
         for (int i = 1; i < rows + 1; ++i)
         {
             for (int j = 1; j < columns + 1; ++j)
@@ -329,13 +349,15 @@ public:
      * @param other Матрица для умножения.
      * @return Новая матрица, являющаяся результатом умножения.
      */
-    template <int OtherColumns>
-    Matrix<rows, OtherColumns, T> operator*(const Matrix<columns, OtherColumns, T> &other)
+    Matrix<T> operator*(const Matrix<T> &other)
     {
-        Matrix<rows, OtherColumns, T> result;
+        if (rows != other.getRows() && columns != other.getColumns())
+            throw std::logic_error("Cannot mult matrix with different sizes");
+        Matrix<T> result(rows, other.getColumns());
+
         for (int i = 1; i < rows + 1; ++i)
         {
-            for (int k = 1; k < OtherColumns + 1; ++k)
+            for (int k = 1; k < other.getColumns() + 1; ++k)
             {
                 T sum = T();
                 for (int j = 1; j < columns + 1; ++j)
@@ -352,9 +374,9 @@ public:
      * @brief Перегрузка оператора унарного минуса для инверсии знака всех элементов матрицы.
      * @return Новая матрица, являющаяся результатом инверсии знака всех элементов текущей матрицы.
      */
-    Matrix<rows, columns, T> operator-() const
+    Matrix<T> operator-() const
     {
-        Matrix<rows, columns, T> result(*this);
+        Matrix<T> result(*this);
         for (auto &pair : result.data)
         {
             pair.second = -pair.second;
@@ -366,9 +388,9 @@ public:
      * @brief Перегрузка оператора транспонирования для возврата транспонированной матрицы.
      * @return Новая матрица, являющаяся транспонированной текущей матрицей.
      */
-    Matrix<columns, rows, T> operator~() const
+    Matrix<T> operator~() const
     {
-        Matrix<columns, rows, T> result;
+        Matrix<T> result(columns, rows);
         for (int i = 1; i < columns + 1; ++i)
         {
             for (int j = 1; j < rows + 1; ++j)
@@ -442,23 +464,40 @@ public:
         return this->data[coords];
     }
 
-    Matrix_proxy<rows, columns, T> operator[](Matrix_coords &&coords)
+    Matrix_proxy<T> operator[](Matrix_coords &&coords)
     {
-        proxies.push_back(Matrix_proxy<rows, columns, T>(this, -1, -1, coords));
+        proxies.push_back(Matrix_proxy<T>(this, rows, columns, -1, -1, coords));
         return proxies.back();
     }
 
-    Matrix_proxy<rows, columns, T> operator[](Matrix_column_coord &&c)
+    Matrix_proxy<T> operator[](Matrix_column_coord &&c)
     {
         Matrix_coords tmp(-1, -1);
-        proxies.push_back(Matrix_proxy<rows, columns, T>(this, -1, c.column, tmp));
+        proxies.push_back(Matrix_proxy<T>(this, rows, columns, -1, c.column, tmp));
         return proxies.back();
     }
 
-    Matrix_proxy<rows, columns, T> operator[](Matrix_row_coord &&r)
+    Matrix_proxy<T> operator[](Matrix_row_coord &&r)
     {
         Matrix_coords tmp(-1, -1);
-        proxies.push_back(Matrix_proxy<rows, columns, T>(this, r.row, -1, tmp));
+        proxies.push_back(Matrix_proxy<T>(this, rows, columns, r.row, -1, tmp));
         return proxies.back();
+    }
+
+    Vector<T> operator*(const Vector<T> &other)
+    {
+        if (other.getLen() != columns)
+            throw std::logic_error("Matrix and vector sizes must be (n x m) * (m x 1)");
+        Vector<T> result(rows);
+        for (int i = 1; i < rows + 1; ++i)
+        {
+            T sum = T();
+            for (int j = 1; j < rows + 1; ++j)
+            {
+                sum += at(i, j) * other.at(j);
+            }
+            result.set(i, sum);
+        }
+        return result;
     }
 };
