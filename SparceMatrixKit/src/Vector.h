@@ -275,6 +275,8 @@ public:
 
     Vector<T> operator*(const Matrix<T> &other)
     {
+        if (len != other.getRows())
+            throw std::logic_error("Invalid operands");
         Vector<T> result(other.getColumns());
 
         for (int j = 1; j < other.getColumns() + 1; ++j)
@@ -288,5 +290,10 @@ public:
         }
 
         return result;
+    }
+
+    bool operator==(const Vector<T> &other) const
+    {
+        return data == other.getData() && eps == other.getEps() && len == other.getLen();
     }
 };

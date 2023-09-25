@@ -25,7 +25,7 @@ public:
 
     Complex_number() : real(0), imag(0) {}
 
-    Complex_number(long int re) : real(static_cast<T>(re)) {}
+    Complex_number(long int re) : real(static_cast<T>(re)), imag(0) {}
 
     Complex_number(const char *r, const char *i) : real(static_cast<T>(std::atof(r))), imag(static_cast<U>(std::atof(i))) {}
 
@@ -277,40 +277,34 @@ public:
 
     // compare operators
 
-    template <typename T1, typename T2>
-    bool operator<(const Complex_number<T1, T2> &other)
+    bool operator<(const Complex_number<T, U> &other) const 
     {
-        return this->Radius() < other.Radius();
+        return this->getRadius() < other.getRadius();
     }
 
-    template <typename T1, typename T2>
-    bool operator<=(const Complex_number<T1, T2> &other)
+    bool operator<=(const Complex_number<T, U> &other) const
     {
-        return this->Radius() <= other.Radius();
+        return this->getRadius() <= other.getRadius();
     }
 
-    template <typename T1, typename T2>
-    bool operator>(const Complex_number<T1, T2> &other)
+    bool operator>(const Complex_number<T, U> &other) const
     {
-        return this->Radius() > other.Radius();
+        return this->getRadius() > other.getRadius();
     }
 
-    template <typename T1, typename T2>
-    bool operator>=(const Complex_number<T1, T2> &other)
+    bool operator>=(const Complex_number<T, U> &other) const
     {
-        return this->Radius() >= other.Radius();
+        return this->getRadius() >= other.getRadius();
     }
 
-    template <typename T1, typename T2>
-    bool operator==(const Complex_number<T1, T2> &other)
+    bool operator==(const Complex_number<T, U> &other) const
     {
-        return this->Radius() == other.Radius();
+        return this->getRadius() == other.getRadius();
     }
 
-    template <typename T1, typename T2>
-    bool operator!=(const Complex_number<T1, T2> &other)
+    bool operator!=(const Complex_number<T, U> &other) const
     {
-        return this->Radius() != other.Radius();
+        return this->getRadius() != other.getRadius();
     }
 
     // out

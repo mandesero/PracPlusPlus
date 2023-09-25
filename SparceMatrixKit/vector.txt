@@ -1,8 +1,0 @@
- Th is f i l e d e s c r i b e s
-# s p a r s e v e c t o r
-#
-vector rational 50000
-1 <100>
-6000 <23 / 5>
-7 < -7/3 > #xui
-22 < 44 /1 >

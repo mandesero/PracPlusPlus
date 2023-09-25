@@ -304,7 +304,7 @@ public:
         T denominator = this->dentor * other.getNumtor();
         if (numerator == 0)
             return Rational_number<T>(0, 1);
-        return Rational_number<T>(numerator, denominator);
+        return Rational_number<T>((denominator > 0 ? 1 : -1) * numerator, (denominator > 0 ? 1 : -1) * denominator);
     }
 
     Rational_number<T> &operator/=(const Rational_number<T> &other)
@@ -314,6 +314,8 @@ public:
 
         this->numtor *= other.getDentor();
         this->dentor *= other.getNumtor();
+        this->numtor *= (dentor > 0 ? 1 : -1);
+        this->dentor *= (dentor > 0 ? 1 : -1);
         return *this;
     }
 
@@ -328,7 +330,7 @@ public:
 
         T numerator = this->numtor;
         T denominator = this->dentor * static_cast<T>(other);
-        return Rational_number<T>(numerator, denominator);
+        return Rational_number<T>((denominator > 0 ? 1 : -1) * numerator, (denominator > 0 ? 1 : -1) * denominator);
     }
 
     template <typename OtherT>
@@ -340,6 +342,7 @@ public:
             throw std::logic_error("Cant devide by zero");
 
         this->dentor *= static_cast<T>(other);
+        this->dentor *= (dentor > 0 ? 1 : -1);
         return *this;
     }
 
@@ -460,7 +463,9 @@ public:
         return std::to_string(this->numtor) + '/' + std::to_string(this->dentor);
     }
 
-    Rational_number<T>& operator=(Rational_number<T>&& other) {
-        return *this;
-    }
+    // Rational_number(const Rational_number<T> &other)
+    // {
+    //     this->numtor = other.getNumtor();
+    //     this->dentor = other.getDentor();
+    // }
 };

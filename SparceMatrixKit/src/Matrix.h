@@ -92,10 +92,21 @@ public:
             int c2 = coords.c2;
             int r1 = coords.r1;
             int r2 = coords.r2;
-
-            for (int i = c1; i <= c2; ++i)
+            if (c1 == -1 || r1 == -1)
             {
-                for (int j = r1; j <= r2; ++j)
+                c1 = 1;
+                r1 = 1;
+            }
+            if (c2 == -1 || r2 == -1)
+            {
+                c2 = columns;
+                r2 = rows;
+            }
+
+
+            for (int j = r1; j <= r2; ++j)
+            {
+                for (int i = c1; i <= c2; ++i)
                     result += matrix->at(i, j).to_string() + " ";
                 result += "\n";
             }
@@ -195,6 +206,11 @@ public:
     const int getColumns() const
     {
         return columns;
+    }
+
+    const auto getData() const
+    {
+        return data;
     }
 
     /**
@@ -499,5 +515,10 @@ public:
             result.set(i, sum);
         }
         return result;
+    }
+
+    bool operator==(const Matrix<T> &other) const
+    {
+        return data == other.getData() && rows == other.getRows() && columns == other.getColumns();
     }
 };

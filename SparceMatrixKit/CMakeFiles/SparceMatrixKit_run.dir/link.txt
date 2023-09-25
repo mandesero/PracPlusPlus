@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/SparceMatrixKit_run.dir/main.cpp.o -o SparceMatrixKit_run  src/libSparceMatrixKit_lib.a 
