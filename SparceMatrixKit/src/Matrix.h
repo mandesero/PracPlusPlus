@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "Vector.h"
+
 template <typename T>
 class Vector;
 
@@ -19,20 +20,46 @@ struct Matrix_coords
     int r2; /**< Конечная строка среза. Если -1, то до конца матрицы. */
     int c2; /**< Конечный столбец среза. Если -1, то до конца матрицы. */
 
+    /**
+     * @brief Construct a new Matrix_coords object
+     *
+     * @param r1
+     * @param c1
+     * @param r2
+     * @param c2
+     */
     Matrix_coords(int r1, int c1, int r2, int c2) : r1(r1), c1(c1), r2(r2), c2(c2) {}
 
+    /**
+     * @brief Construct a new Matrix_coords object
+     *
+     * @param r1
+     * @param c1
+     */
     Matrix_coords(int r1, int c1) : r1(r1), c1(c1), r2(r1), c2(c1) {}
 };
 
 struct Matrix_row_coord
 {
-    int row;
+    int row; /**< Индекс строки */
+
+    /**
+     * @brief Construct a new Matrix_row_coord object
+     *
+     * @param row
+     */
     Matrix_row_coord(int row) : row(row) {}
 };
 
 struct Matrix_column_coord
 {
-    int column;
+    int column; /**< Индекс столбца */
+
+    /**
+     * @brief Construct a new Matrix_column_coord object
+     *
+     * @param column
+     */
     Matrix_column_coord(int column) : column(column) {}
 };
 
@@ -42,6 +69,11 @@ class Matrix;
 template <typename T>
 class Matrix_proxy;
 
+/**
+ * @brief Шаблонный класс для хранения Proxy объекта матрицы
+ *
+ * @tparam T
+ */
 template <typename T>
 class Matrix_proxy
 {
@@ -54,10 +86,29 @@ private:
     int rows;
 
 public:
+    /**
+     * @brief Construct a new Matrix_proxy object
+     *
+     * @param matrix указатель на исходную матрицу
+     * @param rows кол-во строк в исходной матрице
+     * @param columns кол-во столбцов в исходной матрице
+     * @param row номер строки, если аргументом [] был Matrix_row_coord
+     * @param column номер столбца, если аргументом [] был Matrix_column_coord
+     * @param coords координаты среза, если аргументом [] был Matrix_coords
+     */
     Matrix_proxy(Matrix<T> *matrix, int rows, int columns, int row, int column, Matrix_coords coords) : matrix(matrix), columns(columns), row(row), rows(rows), column(column), coords(coords) {}
 
+    /**
+     * @brief Оператор [] для обращения к элементу proxy
+     *
+     * @param index индекс элемента
+     * @return auto& элемент по индексу index
+     */
     auto &operator[](int index)
     {
+        if (matrix == nullptr)
+            throw std::logic_error("Matrix deleted");
+
         if (column != -1 && (index < 1 || index > rows))
             throw std::logic_error("Index out of range");
         if (row != -1 && (index < 1 || index > columns))
@@ -65,16 +116,33 @@ public:
         return column == -1 ? matrix->at(row, index) : matrix->at(index, column);
     }
 
+    /**
+     * @brief Оператор [] для обращения к элементу среза
+     *
+     * @param idxs пара индексов
+     * @return auto& - элемент по индексу (idxs.first, idxs.second)
+     */
     auto &operator[](std::pair<int, int> idxs)
     {
+        if (matrix == nullptr)
+            throw std::logic_error("Matrix deleted");
+
         if (idxs.first < 1 || idxs.first > coords.c2 - 1 || idxs.second < 1 || idxs.second > coords.r2 - 1)
             throw std::logic_error("Index out of range");
 
         return matrix->at(idxs.first + coords.r1 - 1, idxs.second + coords.c1 - 1);
     }
 
+    /**
+     * @brief Преобразование proxy к строке
+     *
+     * @return std::string
+     */
     std::string to_string() const
     {
+        if (matrix == nullptr)
+            throw std::logic_error("Matrix deleted");
+
         std::string result;
         if (column != -1)
         {
@@ -103,7 +171,6 @@ public:
                 r2 = rows;
             }
 
-
             for (int j = r1; j <= r2; ++j)
             {
                 for (int i = c1; i <= c2; ++i)
@@ -114,13 +181,25 @@ public:
         return result;
     }
 
+    /**
+     * @brief Очистка указателя на матрицу в случае ее удаления
+     *
+     */
     void delete_ptr()
     {
         matrix = nullptr;
     }
 
+    /**
+     * @brief Преобрзование proxy в vector
+     *
+     * @return auto
+     */
     auto create_vector()
     {
+        if (matrix == nullptr)
+            throw std::logic_error("Matrix deleted");
+
         if (column == -1 && row == -1)
             throw std::logic_error("Not a vector");
 
@@ -140,6 +219,12 @@ public:
         }
     }
 
+    /**
+     * @brief Взятие повторого среза
+     *
+     * @param new_coords новые координаты
+     * @return Matrix_proxy<T>
+     */
     Matrix_proxy<T> operator[](Matrix_coords &&new_coords)
     {
         int c1 = new_coords.c1;
@@ -187,27 +272,51 @@ protected:
     int columns;
 
 public:
+    /**
+     * @brief Добавить новый проки объект в список
+     *
+     * @param other
+     */
     void add_proxy(Matrix_proxy<T> &other)
     {
         proxies.push_back(other);
     }
 
+    /**
+     * @brief Destroy the Matrix object
+     *
+     */
     ~Matrix()
     {
         for (auto &proxy : proxies)
             proxy.delete_ptr();
     }
 
+    /**
+     * @brief Получить кол-во строк в матрице
+     *
+     * @return const int
+     */
     const int getRows() const
     {
         return rows;
     }
 
+    /**
+     * @brief Получить кол-во столбцов в матрице
+     *
+     * @return const int
+     */
     const int getColumns() const
     {
         return columns;
     }
 
+    /**
+     * @brief Получить словарь, хранящий числа в матрице
+     *
+     * @return const auto
+     */
     const auto getData() const
     {
         return data;
@@ -475,17 +584,35 @@ public:
         return *this;
     }
 
+    /**
+     * @brief Оператор [] для доступа к элементу матрицы по индексу (i, j)
+     *
+     * @param coords координаты
+     * @return auto&
+     */
     auto &operator[](std::pair<int, int> coords)
     {
         return this->data[coords];
     }
 
+    /**
+     * @brief Оператор [] для среза
+     *
+     * @param coords [Matrix_coords]
+     * @return Matrix_proxy<T>
+     */
     Matrix_proxy<T> operator[](Matrix_coords &&coords)
     {
         proxies.push_back(Matrix_proxy<T>(this, rows, columns, -1, -1, coords));
         return proxies.back();
     }
 
+    /**
+     * @brief Оператор [] для proxy столбца
+     *
+     * @param c номер столбца
+     * @return Matrix_proxy<T>
+     */
     Matrix_proxy<T> operator[](Matrix_column_coord &&c)
     {
         Matrix_coords tmp(-1, -1);
@@ -493,6 +620,12 @@ public:
         return proxies.back();
     }
 
+    /**
+     * @brief Оператор [] для proxy строки
+     *
+     * @param r номер строки
+     * @return Matrix_proxy<T>
+     */
     Matrix_proxy<T> operator[](Matrix_row_coord &&r)
     {
         Matrix_coords tmp(-1, -1);
@@ -500,6 +633,12 @@ public:
         return proxies.back();
     }
 
+    /**
+     * @brief Умножения матрицы на вектор
+     *
+     * @param other вектор - множитель
+     * @return [Vector<T>] результат умножения матрицы на вектор
+     */
     Vector<T> operator*(const Vector<T> &other)
     {
         if (other.getLen() != columns)
@@ -517,6 +656,13 @@ public:
         return result;
     }
 
+    /**
+     * @brief оператор сравнения на == двух матрицы
+     *
+     * @param other сравниваемая матрица
+     * @return true матрицы равны
+     * @return false матрицы не равны
+     */
     bool operator==(const Matrix<T> &other) const
     {
         return data == other.getData() && rows == other.getRows() && columns == other.getColumns();

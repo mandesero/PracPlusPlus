@@ -10,6 +10,10 @@
 #include <fstream>
 #include <sstream>
 
+/**
+ * @brief Структра для получения информации об объекте, записанного в файле
+ *
+ */
 struct StreamNumber
 {
     std::string objType;
@@ -21,16 +25,102 @@ struct StreamNumber
     std::ifstream &file;
 };
 
+/**
+ * @brief Начало считывания объекта с файла
+ *
+ * @param file файл как поток
+ * @return StreamNumber - метаинформация
+ */
 StreamNumber readFromFile(std::ifstream &file);
+
+/**
+ * @brief Считывание рационального вектора с файла
+ *
+ * @param meta метаинформация
+ * @param file файл как поток
+ * @return Vector<Rational_number<int64_t>>
+ */
 Vector<Rational_number<int64_t>> getRV(StreamNumber &meta, std::ifstream &file);
+
+/**
+ * @brief Считывание комплексного вектора  [float float] с файла
+ *
+ * @param meta метаинформация
+ * @param file файл как поток
+ * @return Vector<Complex_number<double, double>>
+ */
 Vector<Complex_number<double, double>> getCV_ff(StreamNumber &meta, std::ifstream &file);
+
+/**
+ * @brief Считывание комплексного вектора  [float integer] с файла
+ *
+ * @param meta метаинформация
+ * @param file файл как поток
+ * @return Vector<Complex_number<double, int64_t>>
+ */
 Vector<Complex_number<double, int64_t>> getCV_fi(StreamNumber &meta, std::ifstream &file);
+
+/**
+ * @brief Считывание комплексного вектора  [integer float] с файла
+ *
+ * @param meta метаинформация
+ * @param file файл как поток
+ * @return Vector<Complex_number<int64_t, double>>
+ */
 Vector<Complex_number<int64_t, double>> getCV_if(StreamNumber &meta, std::ifstream &file);
+
+/**
+ * @brief Считывание комплексного вектора  [integer integer] с файла
+ *
+ * @param meta метаинформация
+ * @param file файл как поток
+ * @return Vector<Complex_number<int64_t, int64_t>>
+ */
 Vector<Complex_number<int64_t, int64_t>> getCV_ii(StreamNumber &meta, std::ifstream &file);
+
+/**
+ * @brief Считывание рациональной матрицы с файла
+ *
+ * @param meta метаинформация
+ * @param file файл как поток
+ * @return Matrix<Rational_number<int64_t>>
+ */
 Matrix<Rational_number<int64_t>> getRM(StreamNumber &meta, std::ifstream &file);
+
+/**
+ * @brief Считывание комплексной матрицы [float float] с файла
+ *
+ * @param meta метаинформация
+ * @param file файл как поток
+ * @return Matrix<Complex_number<double, double>>
+ */
 Matrix<Complex_number<double, double>> getCM_ff(StreamNumber &meta, std::ifstream &file);
+
+/**
+ * @brief Считывание комплексной матрицы [float integer] с файла
+ *
+ * @param meta метаинформация
+ * @param file файл как поток
+ * @return Matrix<Complex_number<double, int64_t>>
+ */
 Matrix<Complex_number<double, int64_t>> getCM_fi(StreamNumber &meta, std::ifstream &file);
+
+/**
+ * @brief Считывание комплексной матрицы [integer float] с файла
+ *
+ * @param meta метаинформация
+ * @param file файл как поток
+ * @return Matrix<Complex_number<int64_t, double>>
+ */
 Matrix<Complex_number<int64_t, double>> getCM_if(StreamNumber &meta, std::ifstream &file);
+
+/**
+ * @brief Считывание комплексной матрицы [integer integer] с файла
+ *
+ * @param meta метаинформация
+ * @param file файл как поток
+ * @return Matrix<Complex_number<int64_t, int64_t>>
+ */
 Matrix<Complex_number<int64_t, int64_t>> getCM_ii(StreamNumber &meta, std::ifstream &file);
 
 StreamNumber readFromFile(std::ifstream &file)

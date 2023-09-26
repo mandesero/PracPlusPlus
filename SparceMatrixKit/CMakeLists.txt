@@ -1,11 +1,3 @@
-# cmake_minimum_required(VERSION 3.16)
-# project(SparceMatrixKit)
-# set(CMAKE_CXX_STANDARD 20)
-# add_executable(SparceMatrixKit main.cpp)
-# add_subdirectory(src)
-# target_link_libraries(SparceMatrixKit Rational Complex Vector Matrix)
-# target_include_directories(SparceMatrixKit PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
-
 cmake_minimum_required(VERSION 3.22)
 project(SparceMatrixKit)
 

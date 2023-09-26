@@ -10,6 +10,11 @@
 #include <sstream>
 #include <stdexcept>
 
+/**
+ * @brief Шаблонный класс для хранения разреженных векторов
+ * 
+ * @tparam T - тип элементов вектора
+ */
 template <typename T>
 class Vector
 {
@@ -23,7 +28,7 @@ public:
 
     /**
      * Конструктор класса Vector.
-     * @param len
+     * @param len длина вектора
      * @param epsilon Пороговое значение для признания числа нулевым. По умолчанию равно 0.
      */
     Vector(int len, double epsilon = 0) : eps(epsilon), len(len) {}
@@ -60,20 +65,36 @@ public:
             data[index] = value;
     }
 
+    /**
+     * @brief Возвращает длину вектора
+     *
+     * @return Длина вектора
+     */
     const int getLen() const
     {
         return len;
     }
 
+    /**
+     * @brief Возвращает eps
+     *
+     * @return eps
+     */
     const double getEps() const
     {
         return eps;
     }
 
+    /**
+     * @brief Возвращает словарь, где храняться числа вектора
+     *
+     * @return const std::map<int, T>
+     */
     const std::map<int, T> getData() const
     {
         return data;
     }
+
     /**
      * Возвращает строковое представление вектора.
      * @return Строковое представление вектора.
@@ -107,9 +128,8 @@ public:
      * Перегрузка оператора сложения для векторов с проверкой совпадения размеров и возможности приведения типов чисел.
      * @tparam OtherT Тип чисел во втором векторе.
      * @param other Вектор для сложения.
-     * @return Новая вектор, являющаяся результатом сложения.
+     * @return Новый вектор, являющаяся результатом сложения.
      */
-
     Vector<T> operator+(const Vector<T> &other) const
     {
         if (len != other.getLen())
@@ -129,7 +149,7 @@ public:
      * @tparam OtherU Тип мнимой части.
      * @param other Множитель.
      * @param other Вектор для сложения.
-     * @return Новая вектор, являющаяся результатом сложения.
+     * @return Новый вектор, являющаяся результатом сложения.
      */
     template <typename OtherT = double, typename OtherU = OtherT>
     Vector<Complex_number<OtherT, OtherU>> operator+(const Vector<Complex_number<OtherT, OtherU>> &other) const
@@ -151,7 +171,7 @@ public:
      * Перегрузка оператора вычитания для векторов с проверкой совпадения размеров и возможности приведения типов чисел.
      * @tparam OtherT Тип чисел во втором векторе.
      * @param other Вычитаемый вектор.
-     * @return Новая вектор, являющаяся разностью двух вектров.
+     * @return Новый вектор, являющаяся разностью двух вектров.
      */
     template <typename OtherT>
     Vector<T> operator-(const Vector<OtherT> &other) const
@@ -174,7 +194,7 @@ public:
      * @tparam OtherU Тип мнимой части.
      * @param other Множитель.
      * @param other Вычитаемый вектор.
-     * @return Новая вектор, являющаяся разностью двух вектров.
+     * @return Новый вектор, являющаяся разностью двух вектров.
      */
     template <typename OtherT = double, typename OtherU = OtherT>
     Vector<Complex_number<OtherT, OtherU>> operator-(const Vector<Complex_number<OtherT, OtherU>> &other) const
@@ -266,6 +286,12 @@ public:
         return result;
     }
 
+    /**
+     * @brief Перегрузка оператора [], позволяет получать доступ к элементу вектора по индексу
+     *
+     * @param index индекс элемента
+     * @return ссылка на элемент
+     */
     T &operator[](int index)
     {
         if (index < 1 || index > len)
@@ -273,6 +299,12 @@ public:
         return data[index];
     }
 
+    /**
+     * @brief Перегрузка оператора умножения для умножения вектора (размера n) на матрицу (размера n x m)
+     *
+     * @param other Матрица размера (n x m)
+     * @return Вектор, являющийся результатом умножения вектора на матрицу
+     */
     Vector<T> operator*(const Matrix<T> &other)
     {
         if (len != other.getRows())
@@ -292,6 +324,13 @@ public:
         return result;
     }
 
+    /**
+     * @brief Перегрузка оператора ==, для проверки векторов на равенство
+     *
+     * @param other
+     * @return true если векторы равны
+     * @return false если векторы различны
+     */
     bool operator==(const Vector<T> &other) const
     {
         return data == other.getData() && eps == other.getEps() && len == other.getLen();

@@ -11,12 +11,9 @@
 
 int main()
 {
-    std::string filename_1 = "input/in_vector_1";
-    std::ifstream file_1(filename_1);
-    StreamNumber meta_1 = readFromFile(file_1);
-    auto v_0 = getCV_ff(meta_1, file_1);
-    // auto v_0 = getRV(meta_1, file_1);
-    std::cout << v_0.to_string() << std::endl;
-
+    auto ptr = new Matrix<Rational_number<int64_t>>(2, 2);
+    auto proxy = (*ptr)[Matrix_column_coord(1)];
+    delete ptr;
+    std::cout << proxy.to_string();
     return 0;
 }
