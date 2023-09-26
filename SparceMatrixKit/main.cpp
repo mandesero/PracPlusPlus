@@ -11,9 +11,4 @@
 
 int main()
 {
-    auto ptr = new Matrix<Rational_number<int64_t>>(2, 2);
-    auto proxy = (*ptr)[Matrix_column_coord(1)];
-    delete ptr;
-    std::cout << proxy.to_string();
-    return 0;
 }
