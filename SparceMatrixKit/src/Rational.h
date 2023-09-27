@@ -3,12 +3,15 @@
 #include <iostream>
 #include <type_traits>
 #include <cmath>
+
 #include "Complex.h"
+#include "Exceptions.h"
+#include "Other.h"
 
 /**
  * @brief Шаблонный класс для хранения рационльного числа
- * 
- * @tparam T - тип числителя и знаменателя
+ *
+ * @tparam тип числителя и знаменателя (знаковый целый тип int8_t, int16_t, ...)
  */
 template <typename T>
 class Rational_number
@@ -28,68 +31,72 @@ public:
     Rational_number() : numtor(0), dentor(1) {}
 
     /**
-     * @brief Конструктор
+     * @brief Конструктор, принимающий числитель и знаменатель, как знаковые типы
      *
-     * @param num [long int] - числитель
+     * @param[in] numerator числитель
+     * @param[in] denominator знаменатель
      */
-    Rational_number(long int num) : numtor(num), dentor(1) {}
-
-    /**
-     * @brief Конструктор
-     *
-     * @param numerator числитель
-     * @param denominator знаменатель
-     */
-    Rational_number(T numerator, T denominator)
+    Rational_number(int64_t numerator, int64_t denominator = 1)
     {
         if (denominator == 0)
-            throw std::logic_error("Denominator cannot be zero");
-        this->numtor = (denominator > 0 ? 1 : -1) * numerator;
-        this->dentor = (denominator > 0 ? 1 : -1) * denominator;
+            throw RationalZeroDivisionError<int64_t>("", __FILE__, __LINE__, "Rational_number(int64_t numerator, int64_t denominator)", numerator);
+
+        if (checkOverFlow<T>(numerator) || checkOverFlow<T>(denominator))
+            throw RationalOverflowError<int64_t>("", __FILE__, __LINE__, "Rational_number(int64_t numerator, int64_t denominator)", numerator, denominator);
+
+        this->numtor = (denominator > 0 ? 1 : -1) * static_cast<T>(numerator);
+        this->dentor = (denominator > 0 ? 1 : -1) * static_cast<T>(denominator);
     }
 
     /**
-     * @brief Конструктор
+     * @brief Конструктор примающий рациональное число в формате строки
      *
-     * @param str [const char *] - строка вида 'n / m' или 'k'
+     * @param[in] str указатель на с-строку вида 'n / m' или 'k'
      */
     Rational_number(const char *str)
     {
         std::string s(str);
         size_t i = s.find('/');
-        T numerator, denominator;
+        int64_t numerator, denominator;
         if (i != std::string::npos)
         {
-            numerator = static_cast<T>(std::stol(s.substr(0, i)));
-            denominator = static_cast<T>(std::stol(s.substr(i + 1)));
-            if (denominator == 0)
-            {
-                throw std::logic_error("Denominator cannot be zero");
-            }
+            numerator = std::stol(s.substr(0, i));
+            denominator = std::stol(s.substr(i + 1));
         }
         else
         {
             numerator = std::stol(s);
             denominator = 1;
         }
-        this->numtor = (denominator > 0 ? 1 : -1) * numerator;
-        this->dentor = (denominator > 0 ? 1 : -1) * denominator;
+        if (checkOverFlow<T>(numerator) || checkOverFlow<T>(denominator))
+            throw RationalOverflowError<int64_t>("", __FILE__, __LINE__, "Rational_number(const char *str)", numerator, denominator);
+
+        if (denominator == 0)
+            throw RationalZeroDivisionError("", __FILE__, __LINE__, "Rational_number(const char *str)", numerator);
+
+        this->numtor = (denominator > 0 ? 1 : -1) * static_cast<T>(numerator);
+        this->dentor = (denominator > 0 ? 1 : -1) * static_cast<T>(denominator);
     }
 
     /**
-     * @brief Конструктор
+     * @brief Конструктор принимающий числитель и знаменатель в виде строк
      *
-     * @param num [const char *] - числитель
-     * @param denom [const char *] - знаменатель
+     * @param[in] num указатель на с-строку - числитель
+     * @param[in] denom указатель на с-строку - знаменатель
      */
     Rational_number(const char *num, const char *denom)
     {
-        T numerator = static_cast<T>(std::atol(num));
-        T denominator = static_cast<T>(std::atol(denom));
+        int64_t numerator = std::atol(num);
+        int64_t denominator = std::atol(denom);
+
+        if (checkOverFlow<T>(numerator) || checkOverFlow<T>(denominator))
+            throw RationalOverflowError<int64_t>("", __FILE__, __LINE__, "Rational_number(const char *num, const char *denom)", numerator, denominator);
+
         if (denominator == 0)
-            throw std::logic_error("Denominator cannot be zero");
-        this->numtor = (denominator > 0 ? 1 : -1) * numerator;
-        this->dentor = (denominator > 0 ? 1 : -1) * denominator;
+            throw RationalZeroDivisionError("", __FILE__, __LINE__, "RRational_number(const char *num, const char *denom)", numerator);
+
+        this->numtor = (denominator > 0 ? 1 : -1) * static_cast<T>(numerator);
+        this->dentor = (denominator > 0 ? 1 : -1) * static_cast<T>(denominator);
     }
 
     /**
@@ -113,7 +120,7 @@ public:
     }
 
     /**
-     * @brief Вычисление целой части дроби
+     * @brief Вычисление целой части
      *
      * @return Целая часть
      */
@@ -133,33 +140,33 @@ public:
     }
 
     /**
-     * @brief Преобразование дроби к double
+     * @brief Преобразование рационального числа к double
      *
      * @return double
      */
-    operator double() const
+    explicit operator double() const
     {
         return static_cast<double>(this->numtor) / this->dentor;
     }
 
     /**
-     * @brief Преобразование дроби к int
+     * @brief Преобразование рационального числа к int
      *
      * @return int
      */
-    operator int() const
+    explicit operator int() const
     {
         T rat_to_int = this->numtor / this->dentor;
-        if (!(std::numeric_limits<int>::min() <= rat_to_int && rat_to_int <= std::numeric_limits<int>::max()))
-            throw std::overflow_error("Overflow occurred during conversion to int");
+        if (checkOverFlow<int>(rat_to_int))
+            throw RationalOverflowError<int64_t>("Overflow occurred during conversion to int", __FILE__, __LINE__, "operator int() const", 0);
         return static_cast<int>(rat_to_int);
     }
 
     /**
-     * @brief Оператор присваивания
+     * @brief Оператор присваивания к рациональному числу
      *
-     * @param other рациональное число
-     * @return [Rational_number<T>&] - копия
+     * @param[in] other рациональное число
+     * @return ссылка на измененный элемент
      */
     Rational_number<T> &operator=(const Rational_number<T> &other)
     {
@@ -172,28 +179,38 @@ public:
     }
 
     /**
-     * @brief Оператор присваивания
+     * @brief Оператор присваивания к стандартным типам
      *
-     * @param other [T] - число
-     * @return [Rational_number<T>&] - копия
+     * @param[in] other знаковое целочисленное значение
+     * @return ссылка на измененный элемент
      */
     Rational_number<T> &operator=(T num)
     {
+        if (checkOverFlow<int>(num))
+            throw RationalOverflowError<int64_t>("", __FILE__, __LINE__, "Rational_number<T> &operator=(T num)", num);
         this->numtor = num;
         this->dentor = 1;
         return *this;
     }
 
+    /*
+        Сложение с рациональными числами
+    */
+
     /**
      * @brief Перегрузка оператора сложения с рациональным числом
      *
-     * @param other слагаемое
-     * @return [Rational_number<T>] - новый объект, являющийся суммой слагаемых
+     * @param[in] other рационально число
+     * @return новый объект, являющийся суммой двух рациональных чисел
      */
     Rational_number<T> operator+(const Rational_number<T> &other) const
     {
-        T numerator = this->numtor * other.getDentor() + other.getNumtor() * this->dentor;
-        T denominator = this->dentor * other.getDentor();
+        uint64_t numerator = this->numtor * other.getDentor() + other.getNumtor() * this->dentor;
+        uint64_t denominator = this->dentor * other.getDentor();
+
+        if (checkOverFlow<T>(numerator) || checkOverFlow<T>(denominator))
+            throw RationalOverflowError<int64_t>("", __FILE__, __LINE__, "Rational_number<T> operator+(const Rational_number<T> &other) const", numerator, denominator);
+
         if (numerator == 0)
             return Rational_number<T>(0, 1);
         return Rational_number<T>(numerator, denominator);
@@ -202,31 +219,45 @@ public:
     /**
      * @brief Перегрузка оператора += с рациональным числом
      *
-     * @param other слагаемое
-     * @return [Rational_number<T>&] - ссылка на измененный элемент
+     * @param[in] other рационально число
+     * @return ссылка на измененный элемент
      */
     Rational_number<T> &operator+=(const Rational_number<T> &other)
     {
-        this->numtor = this->numtor * other.getDentor() + other.getNumtor() * this->dentor;
+        uint64_t numerator = this->numtor * other.getDentor() + other.getNumtor() * this->dentor;
+        uint64_t denominator = this->dentor * other.getDentor();
+
+        if (checkOverFlow<T>(numerator) || checkOverFlow<T>(denominator))
+            throw RationalOverflowError<int64_t>("", __FILE__, __LINE__, "Rational_number<T> &operator+=(const Rational_number<T> &other)", numerator, denominator);
+
+        this->numtor = static_cast<T>(numerator);
         if (this->numtor == 0)
             this->dentor = 1;
         else
-            this->dentor *= other.getDentor();
+            this->dentor = static_cast<T>(denominator);
         return *this;
     }
+
+    /*
+        Сложение со стандратными типами
+    */
 
     /**
      * @brief Перегрузка оператора сложения со стандартными типами
      *
-     * @param other слагаемое
-     * @return [Rational_number<T>] - новый объект, являющийся суммой слагаемых
+     * @param[in] other знаковое целочисленное значение
+     * @return новый объект, являющийся суммой рационального числа и числа стандартного типа
      */
     template <typename OtherT>
     Rational_number<T> operator+(const OtherT &other) const
     {
         static_assert(std::is_convertible<OtherT, T>::value, "Invalid type conversion");
 
-        T numerator = this->numtor + this->dentor * static_cast<T>(other);
+        int64_t numerator = this->numtor + this->dentor * other;
+
+        if (checkOverFlow<T>(numerator))
+            throw RationalOverflowError<int64_t>("", __FILE__, __LINE__, "Rational_number<T> operator+(const OtherT &other) const", numerator);
+
         if (numerator == 0)
             return Rational_number<T>(0, 1);
         return Rational_number<T>(numerator, this->dentor);
@@ -235,25 +266,46 @@ public:
     /**
      * @brief Перегрузка оператора += со стандартными типами
      *
-     * @param other слагаемое
-     * @return [Rational_number<T>&] - ссылка на измененный элемент
+     * @param[in] other знаковое целочисленное значение
+     * @return ссылка на измененный элемент
      */
     template <typename OtherT>
     Rational_number<T> &operator+=(const OtherT &other)
     {
         static_assert(std::is_convertible<OtherT, T>::value, "Invalid type conversion");
 
-        this->numtor += static_cast<T>(other) * this->dentor;
+        int64_t numerator = this->numtor + this->dentor * other;
+
+        if (checkOverFlow<T>(numerator))
+            throw RationalOverflowError<int64_t>("", __FILE__, __LINE__, "Rational_number<T> operator+(const OtherT &other) const", numerator);
+
+        this->numtor += static_cast<T>(numerator);
         if (this->numtor == 0)
             this->dentor = 1;
         return *this;
     }
 
     /**
+     * @brief Двуместный оператор для сложения целочисленных знаковых типов с рациональными числами
+     *
+     * @param[in] num целочисленное знаковое значение
+     * @param[in] other рациональное число
+     * @return рациональное число, являющееся суммой двух поступивших значений
+     */
+    friend Rational_number<T> operator+(const int64_t &num, const Rational_number<T> &other)
+    {
+        return Rational_number<T>(num) + other;
+    }
+
+    /*
+        Сложение с комплексными числами и др. операции с +
+    */
+
+    /**
      * @brief Перегрузка оператора сложения с комплексным числом
      *
-     * @param other слагаемое
-     * @return [Complex_number<OtherT, OtherU>] - новый объект, являющийся суммой слагаемых
+     * @param[in] other комплексное число
+     * @return новый объект, являющийся суммой рационального и комплексного чисел
      */
     template <typename OtherT = double, typename OtherU = OtherT>
     Complex_number<OtherT, OtherU> operator+(const Complex_number<OtherT, OtherU> &other) const
@@ -264,7 +316,7 @@ public:
     /**
      * @brief Оператор префиксного инкримента
      *
-     * @return Rational_number<T>&
+     * @return ссылка на измененный элемент
      */
     Rational_number<T> &operator++()
     {
@@ -275,9 +327,9 @@ public:
     }
 
     /**
-     * @brief Оператор постфиксный инкримента
+     * @brief Оператор постфиксного инкримента
      *
-     * @return Rational_number<T>&
+     * @return ссылка на измененный элемент
      */
     Rational_number<T> &operator++(int val)
     {
@@ -287,11 +339,15 @@ public:
         return *this;
     }
 
+    /*
+        Вычитание рациональных чисел
+    */
+
     /**
      * @brief Перегрузка оператора вычитания с рациональным числом
      *
-     * @param other вычитаемое
-     * @return [Rational_number<T>] - новый объект, являющийся суммой слагаемых
+     * @param[in] other рациональное число
+     * @return новый объект, являющийся разностью двух рациональных чисел
      */
     Rational_number<T> operator-(const Rational_number<T> &other) const
     {
@@ -305,8 +361,8 @@ public:
     /**
      * @brief Перегрузка вычитания -= с рациональным числом
      *
-     * @param other вычитаемое
-     * @return [Rational_number<T>&] - ссылка на измененный элемент
+     * @param[in] other рациональное число
+     * @return ссылка на измененный элемент
      */
     Rational_number<T> &operator-=(const Rational_number<T> &other)
     {
@@ -318,11 +374,15 @@ public:
         return *this;
     }
 
+    /*
+        Вычитание стандартных типов
+    */
+
     /**
      * @brief Перегрузка оператора вычитания со стандартными типами
      *
-     * @param other вычитаемое
-     * @return [Rational_number<T>] - новый объект, являющийся разностью
+     * @param[in] other знаковое целочисленное значение
+     * @return новый объект, являющийся разностью рационального числа и числа стандартного типа
      */
     template <typename OtherT>
     Rational_number<T> operator-(const OtherT &other) const
@@ -338,8 +398,8 @@ public:
     /**
      * @brief Перегрузка вычитания -= со стандартными типами
      *
-     * @param other вычитаемое
-     * @return [Rational_number<T>&] - ссылка на измененный элемент
+     * @param[in] other знаковое целочисленное значение
+     * @return ссылка на измененный элемент
      */
     template <typename OtherT>
     Rational_number<T> &operator-=(const OtherT &other)
@@ -351,6 +411,22 @@ public:
             this->dentor = 1;
         return *this;
     }
+
+    /**
+     * @brief Двуместный оператор для вычитания целочисленных знаковых типов с рациональными числами
+     *
+     * @param[in] num целочисленное знаковое значение
+     * @param[in] other рациональное число
+     * @return рациональное число, являющееся разностью двух поступивших значений
+     */
+    friend Rational_number<T> operator-(const int64_t &num, const Rational_number<T> &other)
+    {
+        return Rational_number<T>(num) - other;
+    }
+
+    /*
+        Вычитание комплексных чисел
+    */
 
     /**
      * @brief Перегрузка оператора вычитания с комплексным числом

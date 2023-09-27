@@ -1,6 +1,5 @@
 #include "gtest/gtest.h"
 #include "Rational.h"
-#include "Complex.h"
 
 TEST(Complex_numberTestSuite, Complex_number_0)
 {

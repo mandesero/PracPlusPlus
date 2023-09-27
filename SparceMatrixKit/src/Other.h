@@ -1,440 +1,93 @@
 #pragma once
 
 #include <iostream>
-#include "stdint.h"
-#include "Rational.h"
-#include "Complex.h"
-#include "Vector.h"
-#include "Matrix.h"
-#include <iostream>
 #include <fstream>
 #include <sstream>
+#include <cstring>
+#include <type_traits>
 
 /**
- * @brief Структра для получения информации об объекте, записанного в файле
+ * @brief Проверка происходит ли переполнения типа, задаваемого в шаблоне
  *
+ * @tparam проверяемый тип
+ * @param[in] s указатель на c-строку
+ * @return true если произошло переполнение
+ * @return false если переполнения не произошло
  */
-struct StreamNumber
+template <typename T>
+bool checkOverFlow(const char *s);
+
+/**
+ * @brief Проверка происходит ли переполнения типа, задаваемого в шаблоне
+ *
+ * @tparam проверяемый тип
+ * @param[in] s число
+ * @return true если произошло переполнение
+ * @return false если переполнения не произошло
+ */
+template <typename T>
+bool checkOverFlow(int64_t s);
+
+/**
+ * @brief Get the Min Max object
+ *
+ * @tparam T
+ * @return std::pair<T, T>
+ */
+template <typename T>
+std::pair<const char *, const char *> getMinMax();
+
+template <typename T>
+std::pair<const char *, const char *> getMinMax()
 {
-    std::string objType;
-    std::string numberType;
-    std::string _T1;
-    std::string _T2;
-    int size_1;
-    int size_2;
-    std::ifstream &file;
-};
+    if (sizeof(T) == 1)
+        return std::make_pair(
+            "-128",
+            "127");
+    if (sizeof(T) == 2)
+        return std::make_pair(
+            "-32768",
+            "32767");
+    if (sizeof(T) == 4)
+        return std::make_pair(
+            "-2147483648",
+            "2147483647");
+    if (sizeof(T) == 8)
+        return std::make_pair(
+            "-9223372036854775808",
+            "9223372036854775807");
 
-/**
- * @brief Начало считывания объекта с файла
- *
- * @param file файл как поток
- * @return StreamNumber - метаинформация
- */
-StreamNumber readFromFile(std::ifstream &file);
-
-/**
- * @brief Считывание рационального вектора с файла
- *
- * @param meta метаинформация
- * @param file файл как поток
- * @return Vector<Rational_number<int64_t>>
- */
-Vector<Rational_number<int64_t>> getRV(StreamNumber &meta, std::ifstream &file);
-
-/**
- * @brief Считывание комплексного вектора  [float float] с файла
- *
- * @param meta метаинформация
- * @param file файл как поток
- * @return Vector<Complex_number<double, double>>
- */
-Vector<Complex_number<double, double>> getCV_ff(StreamNumber &meta, std::ifstream &file);
-
-/**
- * @brief Считывание комплексного вектора  [float integer] с файла
- *
- * @param meta метаинформация
- * @param file файл как поток
- * @return Vector<Complex_number<double, int64_t>>
- */
-Vector<Complex_number<double, int64_t>> getCV_fi(StreamNumber &meta, std::ifstream &file);
-
-/**
- * @brief Считывание комплексного вектора  [integer float] с файла
- *
- * @param meta метаинформация
- * @param file файл как поток
- * @return Vector<Complex_number<int64_t, double>>
- */
-Vector<Complex_number<int64_t, double>> getCV_if(StreamNumber &meta, std::ifstream &file);
-
-/**
- * @brief Считывание комплексного вектора  [integer integer] с файла
- *
- * @param meta метаинформация
- * @param file файл как поток
- * @return Vector<Complex_number<int64_t, int64_t>>
- */
-Vector<Complex_number<int64_t, int64_t>> getCV_ii(StreamNumber &meta, std::ifstream &file);
-
-/**
- * @brief Считывание рациональной матрицы с файла
- *
- * @param meta метаинформация
- * @param file файл как поток
- * @return Matrix<Rational_number<int64_t>>
- */
-Matrix<Rational_number<int64_t>> getRM(StreamNumber &meta, std::ifstream &file);
-
-/**
- * @brief Считывание комплексной матрицы [float float] с файла
- *
- * @param meta метаинформация
- * @param file файл как поток
- * @return Matrix<Complex_number<double, double>>
- */
-Matrix<Complex_number<double, double>> getCM_ff(StreamNumber &meta, std::ifstream &file);
-
-/**
- * @brief Считывание комплексной матрицы [float integer] с файла
- *
- * @param meta метаинформация
- * @param file файл как поток
- * @return Matrix<Complex_number<double, int64_t>>
- */
-Matrix<Complex_number<double, int64_t>> getCM_fi(StreamNumber &meta, std::ifstream &file);
-
-/**
- * @brief Считывание комплексной матрицы [integer float] с файла
- *
- * @param meta метаинформация
- * @param file файл как поток
- * @return Matrix<Complex_number<int64_t, double>>
- */
-Matrix<Complex_number<int64_t, double>> getCM_if(StreamNumber &meta, std::ifstream &file);
-
-/**
- * @brief Считывание комплексной матрицы [integer integer] с файла
- *
- * @param meta метаинформация
- * @param file файл как поток
- * @return Matrix<Complex_number<int64_t, int64_t>>
- */
-Matrix<Complex_number<int64_t, int64_t>> getCM_ii(StreamNumber &meta, std::ifstream &file);
-
-StreamNumber readFromFile(std::ifstream &file)
-{
-    if (!file.is_open())
-    {
-        throw std::runtime_error("Failed to open file.");
-    }
-
-    std::string type;
-    std::string paramType;
-    int size_1 = -1;
-    int size_2 = -1;
-    std::string _T1;
-    std::string _T2;
-
-    std::string line;
-    while (std::getline(file, line))
-    {
-        if (line.empty() || line.find("#") == 0)
-        {
-            continue;
-        }
-
-        std::istringstream iss(line);
-        iss >> type;
-        if (type == "vector")
-        {
-            iss >> paramType;
-            if (paramType != "complex" && paramType != "rational")
-                throw std::logic_error("Bad type");
-
-            if (paramType == "complex")
-            {
-                iss >> _T1 >> _T2;
-                if ((_T1 != "integer" && _T1 != "float") || (_T2 != "integer" && _T2 != "float"))
-                    throw std::logic_error("Bad type");
-            }
-            iss >> size_1;
-            break;
-        }
-        else if (type == "matrix")
-        {
-            iss >> paramType;
-            if (paramType != "complex" && paramType != "rational")
-                throw std::logic_error("Bad type");
-
-            if (paramType == "complex")
-            {
-                iss >> _T1 >> _T2;
-                if ((_T1 != "integer" && _T1 != "float") || (_T2 != "integer" && _T2 != "float"))
-                    throw std::logic_error("Bad type");
-            }
-            iss >> size_1 >> size_2;
-            break;
-        }
-    }
-    return StreamNumber{type, paramType, _T1, _T2, size_1, size_2, file};
+    return std::make_pair(
+        "",
+        "");
 }
 
-// Rational Vector
-Vector<Rational_number<int64_t>> getRV(StreamNumber &meta, std::ifstream &file)
+template <typename T>
+bool checkOverFlow(const char *s)
 {
-    Vector<Rational_number<int64_t>> result(meta.size_1);
-    std::string line;
-    while (std::getline(file, line))
+    std::pair<const char *, const char *> minMaxT = getMinMax<T>();
+    if (s[0] == '-')
     {
-        std::istringstream iss(line);
+        if (std::strlen(s) < std::strlen(minMaxT.first))
+            return false;
+        if (std::strlen(s) > std::strlen(minMaxT.first))
+            return true;
 
-        int idx;
-        std::string valueString;
-
-        iss >> idx;
-        auto left = line.find('<');
-        auto right = line.find('>');
-
-        valueString = line.substr(left + 1, right - left - 1);
-        Rational_number<int64_t> tmp(valueString.c_str());
-        result.set(idx, tmp);
+        return std::strcmp(s, minMaxT.first) > 0;
     }
-    file.close();
-    return result;
+    else
+    {
+        if (std::strlen(s) < std::strlen(minMaxT.second))
+            return false;
+        if (std::strlen(s) > std::strlen(minMaxT.second))
+            return true;
+
+        return std::strcmp(s, minMaxT.second) > 0;
+    }
 }
 
-// Complex Vector
-Vector<Complex_number<double, double>> getCV_ff(StreamNumber &meta, std::ifstream &file)
+template <typename T>
+bool checkOverFlow(int64_t s)
 {
-    Vector<Complex_number<double, double>> result(meta.size_1);
-    std::string line;
-    while (std::getline(file, line))
-    {
-        if (line.empty())
-            continue;
-        std::istringstream iss(line);
-
-        int idx;
-        std::string valueString;
-
-        iss >> idx;
-        auto left = line.find('(');
-        auto right = line.find(')');
-
-        valueString = line.substr(left + 1, right - left - 1);
-        Complex_number<double, double> tmp(valueString.c_str());
-        result.set(idx, tmp);
-    }
-    file.close();
-    return result;
-}
-
-Vector<Complex_number<double, int64_t>> getCV_fi(StreamNumber &meta, std::ifstream &file)
-{
-    Vector<Complex_number<double, int64_t>> result(meta.size_1);
-    std::string line;
-    while (std::getline(file, line))
-    {
-        if (line.empty())
-            continue;
-        std::istringstream iss(line);
-
-        int idx;
-        std::string valueString;
-
-        iss >> idx;
-        auto left = line.find('(');
-        auto right = line.find(')');
-
-        valueString = line.substr(left + 1, right - left - 1);
-        Complex_number<double, int64_t> tmp(valueString.c_str());
-        result.set(idx, tmp);
-    }
-    file.close();
-    return result;
-}
-
-Vector<Complex_number<int64_t, double>> getCV_if(StreamNumber &meta, std::ifstream &file)
-{
-    Vector<Complex_number<int64_t, double>> result(meta.size_1);
-    std::string line;
-    while (std::getline(file, line))
-    {
-        if (line.empty())
-            continue;
-        std::istringstream iss(line);
-
-        int idx;
-        std::string valueString;
-
-        iss >> idx;
-        auto left = line.find('(');
-        auto right = line.find(')');
-
-        valueString = line.substr(left + 1, right - left - 1);
-        Complex_number<int64_t, double> tmp(valueString.c_str());
-        result.set(idx, tmp);
-    }
-    file.close();
-    return result;
-}
-
-Vector<Complex_number<int64_t, int64_t>> getCV_ii(StreamNumber &meta, std::ifstream &file)
-{
-    Vector<Complex_number<int64_t, int64_t>> result(meta.size_1);
-    std::string line;
-    while (std::getline(file, line))
-    {
-        if (line.empty())
-            continue;
-        std::istringstream iss(line);
-
-        int idx;
-        std::string valueString;
-
-        iss >> idx;
-        auto left = line.find('(');
-        auto right = line.find(')');
-
-        valueString = line.substr(left + 1, right - left - 1);
-        Complex_number<int64_t, int64_t> tmp(valueString.c_str());
-        result.set(idx, tmp);
-    }
-    file.close();
-    return result;
-}
-
-// Rational matrix
-
-Matrix<Rational_number<int64_t>> getRM(StreamNumber &meta, std::ifstream &file)
-{
-    Matrix<Rational_number<int64_t>> result(meta.size_1, meta.size_2);
-    std::string line;
-    while (std::getline(file, line))
-    {
-        if (line.empty())
-            continue;
-        std::istringstream iss(line);
-
-        int idx_1;
-        int idx_2;
-        std::string valueString;
-
-        iss >> idx_1 >> idx_2;
-        auto left = line.find('<');
-        auto right = line.find('>');
-
-        valueString = line.substr(left + 1, right - left - 1);
-        Rational_number<int64_t> tmp(valueString.c_str());
-        result.set(idx_1, idx_2, tmp);
-    }
-    file.close();
-    return result;
-}
-
-// Complex matrix
-Matrix<Complex_number<double, double>> getCM_ff(StreamNumber &meta, std::ifstream &file)
-{
-    Matrix<Complex_number<double, double>> result(meta.size_1, meta.size_2);
-    std::string line;
-    while (std::getline(file, line))
-    {
-        if (line.empty())
-            continue;
-        std::istringstream iss(line);
-
-        int idx_1;
-        int idx_2;
-        std::string valueString;
-
-        iss >> idx_1 >> idx_2;
-        auto left = line.find('(');
-        auto right = line.find(')');
-
-        valueString = line.substr(left + 1, right - left - 1);
-        Complex_number<double, double> tmp(valueString.c_str());
-        result.set(idx_1, idx_2, tmp);
-    }
-    file.close();
-    return result;
-}
-
-Matrix<Complex_number<double, int64_t>> getCM_fi(StreamNumber &meta, std::ifstream &file)
-{
-    Matrix<Complex_number<double, int64_t>> result(meta.size_1, meta.size_2);
-    std::string line;
-    while (std::getline(file, line))
-    {
-        if (line.empty())
-            continue;
-        std::istringstream iss(line);
-
-        int idx_1;
-        int idx_2;
-        std::string valueString;
-
-        iss >> idx_1 >> idx_2;
-        auto left = line.find('(');
-        auto right = line.find(')');
-
-        valueString = line.substr(left + 1, right - left - 1);
-        Complex_number<double, int64_t> tmp(valueString.c_str());
-        result.set(idx_1, idx_2, tmp);
-    }
-    file.close();
-    return result;
-}
-
-Matrix<Complex_number<int64_t, double>> getCM_if(StreamNumber &meta, std::ifstream &file)
-{
-    Matrix<Complex_number<int64_t, double>> result(meta.size_1, meta.size_2);
-    std::string line;
-    while (std::getline(file, line))
-    {
-        if (line.empty())
-            continue;
-        std::istringstream iss(line);
-
-        int idx_1;
-        int idx_2;
-        std::string valueString;
-
-        iss >> idx_1 >> idx_2;
-        auto left = line.find('(');
-        auto right = line.find(')');
-
-        valueString = line.substr(left + 1, right - left - 1);
-        Complex_number<int64_t, double> tmp(valueString.c_str());
-        result.set(idx_1, idx_2, tmp);
-    }
-    file.close();
-    return result;
-}
-
-Matrix<Complex_number<int64_t, int64_t>> getCM_ii(StreamNumber &meta, std::ifstream &file)
-{
-    Matrix<Complex_number<int64_t, int64_t>> result(meta.size_1, meta.size_2);
-    std::string line;
-    while (std::getline(file, line))
-    {
-        if (line.empty())
-            continue;
-        std::istringstream iss(line);
-
-        int idx_1;
-        int idx_2;
-        std::string valueString;
-
-        iss >> idx_1 >> idx_2;
-        auto left = line.find('(');
-        auto right = line.find(')');
-
-        valueString = line.substr(left + 1, right - left - 1);
-        Complex_number<int64_t, int64_t> tmp(valueString.c_str());
-        result.set(idx_1, idx_2, tmp);
-    }
-    file.close();
-    return result;
+    return checkOverFlow<T>(std::to_string(s).c_str());
 }
