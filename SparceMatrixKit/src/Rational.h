@@ -36,7 +36,7 @@ public:
      * @param[in] numerator числитель
      * @param[in] denominator знаменатель
      */
-    Rational_number(int64_t numerator, int64_t denominator = 1)
+    explicit Rational_number(int64_t numerator, int64_t denominator = 1)
     {
         if (denominator == 0)
             throw RationalZeroDivisionError<int64_t>("", __FILE__, __LINE__, "Rational_number(int64_t numerator, int64_t denominator)", numerator);
@@ -60,13 +60,27 @@ public:
         int64_t numerator, denominator;
         if (i != std::string::npos)
         {
-            numerator = std::stol(s.substr(0, i));
-            denominator = std::stol(s.substr(i + 1));
+            try
+            {
+                numerator = std::stol(s.substr(0, i));
+                denominator = std::stol(s.substr(i + 1));
+            }
+            catch (std::exception &ex)
+            {
+                throw RationalOverflowError<int64_t>("", __FILE__, __LINE__, "Rational_number(const char *str)", numerator, denominator);
+            }
         }
         else
         {
-            numerator = std::stol(s);
-            denominator = 1;
+            try
+            {
+                numerator = std::stol(s);
+                denominator = 1;
+            }
+            catch (std::exception &ex)
+            {
+                throw RationalOverflowError<int64_t>("", __FILE__, __LINE__, "Rational_number(const char *str)", numerator, denominator);
+            }
         }
         if (checkOverFlow<T>(numerator) || checkOverFlow<T>(denominator))
             throw RationalOverflowError<int64_t>("", __FILE__, __LINE__, "Rational_number(const char *str)", numerator, denominator);
@@ -74,8 +88,16 @@ public:
         if (denominator == 0)
             throw RationalZeroDivisionError("", __FILE__, __LINE__, "Rational_number(const char *str)", numerator);
 
-        this->numtor = (denominator > 0 ? 1 : -1) * static_cast<T>(numerator);
-        this->dentor = (denominator > 0 ? 1 : -1) * static_cast<T>(denominator);
+        if (numerator == 0)
+        {
+            this->numtor = 0;
+            this->dentor = 1;
+        }
+        else
+        {
+            this->numtor = (denominator > 0 ? 1 : -1) * static_cast<T>(numerator);
+            this->dentor = (denominator > 0 ? 1 : -1) * static_cast<T>(denominator);
+        }
     }
 
     /**
@@ -86,8 +108,17 @@ public:
      */
     Rational_number(const char *num, const char *denom)
     {
-        int64_t numerator = std::atol(num);
-        int64_t denominator = std::atol(denom);
+        int64_t numerator;
+        int64_t denominator;
+        try
+        {
+            numerator = std::atol(num);
+            denominator = std::atol(denom);
+        }
+        catch (std::exception &ex)
+        {
+            throw RationalOverflowError<int64_t>("", __FILE__, __LINE__, "Rational_number(const char *num, const char *denom)", numerator, denominator);
+        }
 
         if (checkOverFlow<T>(numerator) || checkOverFlow<T>(denominator))
             throw RationalOverflowError<int64_t>("", __FILE__, __LINE__, "Rational_number(const char *num, const char *denom)", numerator, denominator);
@@ -95,8 +126,16 @@ public:
         if (denominator == 0)
             throw RationalZeroDivisionError("", __FILE__, __LINE__, "RRational_number(const char *num, const char *denom)", numerator);
 
-        this->numtor = (denominator > 0 ? 1 : -1) * static_cast<T>(numerator);
-        this->dentor = (denominator > 0 ? 1 : -1) * static_cast<T>(denominator);
+        if (numerator == 0)
+        {
+            this->numtor = 0;
+            this->dentor = 1;
+        }
+        else
+        {
+            this->numtor = (denominator > 0 ? 1 : -1) * static_cast<T>(numerator);
+            this->dentor = (denominator > 0 ? 1 : -1) * static_cast<T>(denominator);
+        }
     }
 
     /**
@@ -279,7 +318,7 @@ public:
         if (checkOverFlow<T>(numerator))
             throw RationalOverflowError<int64_t>("", __FILE__, __LINE__, "Rational_number<T> operator+(const OtherT &other) const", numerator);
 
-        this->numtor += static_cast<T>(numerator);
+        this->numtor = static_cast<T>(numerator);
         if (this->numtor == 0)
             this->dentor = 1;
         return *this;
@@ -425,14 +464,14 @@ public:
     }
 
     /*
-        Вычитание комплексных чисел
+        Вычитание комплексных чисел, и др. операции с -
     */
 
     /**
      * @brief Перегрузка оператора вычитания с комплексным числом
      *
-     * @param other вычитаемое
-     * @return [Complex_number<OtherT, OtherU>] - новый объект, являющийся разностью
+     * @param[in] other комплексное число
+     * @return новый объект, являющийся разностью рационального и комплексного числа
      */
     template <typename OtherT = double, typename OtherU = OtherT>
     Complex_number<OtherT, OtherU> operator-(const Complex_number<OtherT, OtherU> &other) const
@@ -443,18 +482,22 @@ public:
     /**
      * @brief Оператор унарного минуса
      *
-     * @return [Rational_number<T>] число со знаком минус
+     * @return число со знаком минус
      */
     Rational_number<T> operator-() const
     {
         return Rational_number<T>(-this->numtor, this->dentor);
     }
 
+    /*
+        Умножение на рациональные числа
+    */
+
     /**
      * @brief Перегрузка умножения на рациональное число
      *
-     * @param other множитель
-     * @return [Rational_number<T>] - новый объект, являющийся результатом умножния
+     * @param[in] other рациональное число
+     * @return новый объект, являющийся результатом умножния
      */
     Rational_number<T> operator*(const Rational_number<T> &other) const
     {
@@ -468,8 +511,8 @@ public:
     /**
      * @brief Перегрузка умножения *= на рациональное число
      *
-     * @param other множитель
-     * @return [Rational_number<T>&] - ссылка на измененный элемент
+     * @param[in] other рациональное число
+     * @return ссылка на измененный элемент
      */
     Rational_number<T> &operator*=(const Rational_number<T> &other)
     {
@@ -481,11 +524,15 @@ public:
         return *this;
     }
 
+    /*
+        Умножение на стандартный тип
+    */
+
     /**
-     * @brief Перегрузка умножения на стандартный тип
+     * @brief Перегрузка оператора умножения на стандартный тип
      *
-     * @param other множитель
-     * @return [Rational_number<T>] - новый объект, являющийся результатом умножния
+     * @param[in] other знаковое целочисленное значение
+     * @return новый объект, являющийся результатом умножния рационального и знакового целочисленного значения
      */
     template <typename OtherT>
     Rational_number<T> operator*(const OtherT &other) const
@@ -503,8 +550,8 @@ public:
     /**
      * @brief Перегрузка умножения *= на стандартный тип
      *
-     * @param other множитель
-     * @return [Rational_number<T>&] - ссылка на измененный элемент
+     * @param[in] other знаковое целочисленное значение
+     * @return ссылка на измененный элемент
      */
     template <typename OtherT>
     Rational_number<T> &operator*=(const OtherT &other)
@@ -518,10 +565,26 @@ public:
     }
 
     /**
-     * @brief Перегрузка умножения на комлпексное число
+     * @brief Двуместный оператор для умножения целочисленных знаковых типов с рациональными числами
      *
-     * @param other множитель
-     * @return [Complex_number<OtherT, OtherU>] - новый объект, являющийся результатом умножния
+     * @param[in] num целочисленное знаковое значение
+     * @param[in] other рациональное число
+     * @return рациональное число, являющееся разностью двух поступивших значений
+     */
+    friend Rational_number<T> operator*(const int64_t &num, const Rational_number<T> &other)
+    {
+        return Rational_number<T>(num) * other;
+    }
+
+    /*
+        Умножение на комплексное число
+    */
+
+    /**
+     * @brief Перегрузка оператора умножения на комплексное число
+     *
+     * @param[in] other комплексное число
+     * @return новый объект, являющийся результатом умножния рационального и комплексного числа
      */
     template <typename OtherT = double, typename OtherU = OtherT>
     Complex_number<OtherT, OtherU> operator*(const Complex_number<OtherT, OtherU> &other) const
@@ -531,14 +594,20 @@ public:
         return Complex_number<OtherT, OtherU>(re, im);
     }
 
+    /*
+        Деление на рациональные числа
+    */
+
     /**
-     * @brief Перегрузка деления на рациональное число
+     * @brief Перегрузка оператора деления на рациональное число
      *
-     * @param other делитель
-     * @return [Rational_number<T>] - новый объект, являющийся результатом деления
+     * @param[in] other рациональное число
+     * @return рациональное число, являющееся частным двух поступивших значений
      */
     Rational_number<T> operator/(const Rational_number<T> &other) const
     {
+        if (other.getNumtor() == 0)
+            throw RationalZeroDivisionError<int64_t>("", __FILE__, __LINE__, "Rational_number<T> operator/(const Rational_number<T> &other) const", this->to_string(), other.to_string());
         T numerator = this->numtor * other.getDentor();
         T denominator = this->dentor * other.getNumtor();
         if (numerator == 0)
@@ -547,15 +616,15 @@ public:
     }
 
     /**
-     * @brief Перегрузка деления /= на рациональное число
+     * @brief Перегрузка оператора /= на рациональное число
      *
-     * @param other делитель
+     * @param[in] other рациональное число
      * @return [Rational_number<T>&] - ссылка на измененный элемент
      */
     Rational_number<T> &operator/=(const Rational_number<T> &other)
     {
         if (other.getNumtor() == 0)
-            throw std::logic_error("Cant devide by zero");
+            throw RationalZeroDivisionError<int64_t>("", __FILE__, __LINE__, "Rational_number<T> &operator/=(const Rational_number<T> &other)", this->to_string(), other.to_string());
 
         this->numtor *= other.getDentor();
         this->dentor *= other.getNumtor();
@@ -564,11 +633,15 @@ public:
         return *this;
     }
 
+    /*
+        Деление на стандартный тип
+    */
+
     /**
-     * @brief Перегрузка деления на стандартный тип
+     * @brief Перегрузка оператора деления на стандартный тип
      *
-     * @param other делитель
-     * @return [Rational_number<T>] - новый объект, являющийся результатом деления
+     * @param[in] other знаковое целочисленное значение
+     * @return новый объект, являющийся результатом деления рационального числа и знакового целочисленного значения
      */
     template <typename OtherT>
     Rational_number<T> operator/(const OtherT &other) const
@@ -576,7 +649,7 @@ public:
         static_assert(std::is_convertible<OtherT, T>::value, "Invalid type conversion");
 
         if (other == 0)
-            throw std::logic_error("Cant devide by zero");
+            throw RationalZeroDivisionError<int64_t>("", __FILE__, __LINE__, "Rational_number<T> operator/(const OtherT &other) const", this->to_string(), std::to_string(other));
 
         T numerator = this->numtor;
         T denominator = this->dentor * static_cast<T>(other);
@@ -584,15 +657,17 @@ public:
     }
 
     /**
-     * @brief Перегрузка деления /= на стандартный тип
+     * @brief Перегрузка оператора /= на стандартный тип
      *
-     * @param other делитель
-     * @return [Rational_number<T>&] - ссылка на измененный элемент
+     * @param[in] other знаковое целочисленное значение
+     * @return ссылка на измененный элемент
      */
     template <typename OtherT>
     Rational_number<T> &operator/=(const OtherT &other)
     {
         static_assert(std::is_convertible<OtherT, T>::value, "Invalid type conversion");
+        if (other == 0)
+            throw RationalZeroDivisionError<int64_t>("", __FILE__, __LINE__, "Rational_number<T> &operator/=(const OtherT &other)", this->to_string(), std::to_string(other));
 
         if (other == 0)
             throw std::logic_error("Cant devide by zero");
@@ -603,10 +678,26 @@ public:
     }
 
     /**
-     * @brief Перегрузка деления на комплексное число
+     * @brief Двуместный оператор для деления целочисленных знаковых типов с рациональными числами
      *
-     * @param other делитель
-     * @return [Complex_number<OtherT, OtherU>] - новый объект, являющийся результатом деления
+     * @param[in] num целочисленное знаковое значение
+     * @param[in] other рациональное число
+     * @return рациональное число, являющееся частным двух поступивших значений
+     */
+    friend Rational_number<T> operator/(const int64_t &num, const Rational_number<T> &other)
+    {
+        return Rational_number<T>(num) / other;
+    }
+
+    /*
+        Деление на комплексное число
+    */
+
+    /**
+     * @brief Перегрузка оператора деления на комплексное число
+     *
+     * @param[in] other комплексное число
+     * @return новый объект, являющийся результатом деления рационального и комплексного числа
      */
     template <typename OtherT = double, typename OtherU = OtherT>
     Complex_number<OtherT, OtherU> operator/(const Complex_number<OtherT, OtherU> &other) const
@@ -615,10 +706,14 @@ public:
         return tmp / other;
     }
 
+    /*
+        Операторы сравнения
+    */
+
     /**
-     * @brief Перегрузка оператора < для сравнения двух рациональных числе
+     * @brief Перегрузка оператора < для сравнения двух рациональных чисел
      *
-     * @param other Сравнимое число
+     * @param[in] other Рациональное число
      * @return true
      * @return false
      */
@@ -628,23 +723,37 @@ public:
     }
 
     /**
-     * @brief Перегрузка оператора < для сравнения со стандартными типами
+     * @brief Перегрузка оператора < для сравнения рационального числа и числа целочисленного знакового типа
      *
-     * @param other Сравнимое число
+     * @param[in] other Рациональное число
+     * @param[in] num Целочисленное знаковое значение
      * @return true
      * @return false
      */
-    template <typename OtherT>
-    bool operator<(const OtherT &other) const
+    friend bool operator<(const Rational_number<T> &other, const int64_t &num)
     {
-        static_assert(std::is_convertible<OtherT, T>::value, "Invalid type conversion");
-        return (this->numtor) < (static_cast<T>(other) * this->dentor);
+        return other < Rational_number<T>(num);
     }
 
     /**
-     * @brief Перегрузка оператора <= для сравнения двух рациональных числе
+     * @brief Перегрузка оператора < для сравнения рационального числа и числа целочисленного знакового типа
      *
-     * @param other Сравнимое число
+     * @param[in] num Целочисленное знаковое значение
+     * @param[in] other Рациональное число
+     * @return true
+     * @return false
+     */
+    friend bool operator<(const int64_t &num, const Rational_number<T> &other)
+    {
+        return other < Rational_number<T>(num);
+    }
+
+    // =========================================
+
+    /**
+     * @brief Перегрузка оператора <= для сравнения двух рациональных чисел
+     *
+     * @param[in] other Рациональное число
      * @return true
      * @return false
      */
@@ -654,23 +763,37 @@ public:
     }
 
     /**
-     * @brief Перегрузка оператора <= для сравнения со стандартными типами
+     * @brief Перегрузка оператора <= для сравнения рационального числа и числа целочисленного знакового типа
      *
-     * @param other Сравнимое число
+     * @param[in] other Рациональное число
+     * @param[in] num Целочисленное знаковое значение
      * @return true
      * @return false
      */
-    template <typename OtherT>
-    bool operator<=(const OtherT &other) const
+    friend bool operator<=(const Rational_number<T> &other, const int64_t &num)
     {
-        static_assert(std::is_convertible<OtherT, T>::value, "Invalid type conversion");
-        return (this->numtor) <= (static_cast<T>(other) * this->dentor);
+        return other <= Rational_number<T>(num);
     }
 
     /**
-     * @brief Перегрузка оператора > для сравнения двух рациональных числе
+     * @brief Перегрузка оператора <= для сравнения рационального числа и числа целочисленного знакового типа
      *
-     * @param other Сравнимое число
+     * @param[in] num Целочисленное знаковое значение
+     * @param[in] other Рациональное число
+     * @return true
+     * @return false
+     */
+    friend bool operator<=(const int64_t &num, const Rational_number<T> &other)
+    {
+        return other <= Rational_number<T>(num);
+    }
+
+    // =========================================
+
+    /**
+     * @brief Перегрузка оператора > для сравнения двух рациональных чисел
+     *
+     * @param[in] other Рациональное число
      * @return true
      * @return false
      */
@@ -680,23 +803,37 @@ public:
     }
 
     /**
-     * @brief Перегрузка оператора > для сравнения со стандартными типами
+     * @brief Перегрузка оператора > для сравнения рационального числа и числа целочисленного знакового типа
      *
-     * @param other Сравнимое число
+     * @param[in] other Рациональное число
+     * @param[in] num Целочисленное знаковое значение
      * @return true
      * @return false
      */
-    template <typename OtherT>
-    bool operator>(const OtherT &other) const
+    friend bool operator>(const Rational_number<T> &other, const int64_t &num)
     {
-        static_assert(std::is_convertible<OtherT, T>::value, "Invalid type conversion");
-        return (this->numtor) > (static_cast<T>(other) * this->dentor);
+        return other > Rational_number<T>(num);
     }
 
     /**
-     * @brief Перегрузка оператора >= для сравнения двух рациональных числе
+     * @brief Перегрузка оператора > для сравнения рационального числа и числа целочисленного знакового типа
      *
-     * @param other Сравнимое число
+     * @param[in] num Целочисленное знаковое значение
+     * @param[in] other Рациональное число
+     * @return true
+     * @return false
+     */
+    friend bool operator>(const int64_t &num, const Rational_number<T> &other)
+    {
+        return other > Rational_number<T>(num);
+    }
+
+    // =========================================
+
+    /**
+     * @brief Перегрузка оператора >= для сравнения двух рациональных чисел
+     *
+     * @param[in] other Рациональное число
      * @return true
      * @return false
      */
@@ -706,23 +843,37 @@ public:
     }
 
     /**
-     * @brief Перегрузка оператора >= для сравнения со стандартными типами
+     * @brief Перегрузка оператора >= для сравнения рационального числа и числа целочисленного знакового типа
      *
-     * @param other Сравнимое число
+     * @param[in] other Рациональное число
+     * @param[in] num Целочисленное знаковое значение
      * @return true
      * @return false
      */
-    template <typename OtherT>
-    bool operator>=(const OtherT &other) const
+    friend bool operator>=(const Rational_number<T> &other, const int64_t &num)
     {
-        static_assert(std::is_convertible<OtherT, T>::value, "Invalid type conversion");
-        return (this->numtor) >= (static_cast<T>(other) * this->dentor);
+        return other >= Rational_number<T>(num);
     }
 
     /**
-     * @brief Перегрузка оператора == для сравнения двух рациональных числе
+     * @brief Перегрузка оператора >= для сравнения рационального числа и числа целочисленного знакового типа
      *
-     * @param other Сравнимое число
+     * @param[in] num Целочисленное знаковое значение
+     * @param[in] other Рациональное число
+     * @return true
+     * @return false
+     */
+    friend bool operator>=(const int64_t &num, const Rational_number<T> &other)
+    {
+        return other >= Rational_number<T>(num);
+    }
+
+    // =========================================
+
+    /**
+     * @brief Перегрузка оператора == для сравнения двух рациональных чисел
+     *
+     * @param[in] other Рациональное число
      * @return true
      * @return false
      */
@@ -732,23 +883,37 @@ public:
     }
 
     /**
-     * @brief Перегрузка оператора == для сравнения со стандартными типами
+     * @brief Перегрузка оператора == для сравнения рационального числа и числа целочисленного знакового типа
      *
-     * @param other Сравнимое число
+     * @param[in] other Рациональное число
+     * @param[in] num Целочисленное знаковое значение
      * @return true
      * @return false
      */
-    template <typename OtherT>
-    bool operator==(const OtherT &other) const
+    friend bool operator==(const Rational_number<T> &other, const int64_t &num)
     {
-        static_assert(std::is_convertible<OtherT, T>::value, "Invalid type conversion");
-        return (this->numtor) == (static_cast<T>(other) * this->dentor);
+        return other == Rational_number<T>(num);
     }
 
     /**
-     * @brief Перегрузка оператора != для сравнения двух рациональных числе
+     * @brief Перегрузка оператора == для сравнения рационального числа и числа целочисленного знакового типа
      *
-     * @param other Сравнимое число
+     * @param[in] num Целочисленное знаковое значение
+     * @param[in] other Рациональное число
+     * @return true
+     * @return false
+     */
+    friend bool operator==(const int64_t &num, const Rational_number<T> &other)
+    {
+        return other == Rational_number<T>(num);
+    }
+
+    // =========================================
+
+    /**
+     * @brief Перегрузка оператора != для сравнения двух рациональных чисел
+     *
+     * @param[in] other Рациональное число
      * @return true
      * @return false
      */
@@ -758,25 +923,39 @@ public:
     }
 
     /**
-     * @brief Перегрузка оператора != для сравнения со стандартными типами
+     * @brief Перегрузка оператора != для сравнения рационального числа и числа целочисленного знакового типа
      *
-     * @param other Сравнимое число
+     * @param[in] other Рациональное число
+     * @param[in] num Целочисленное знаковое значение
      * @return true
      * @return false
      */
-    template <typename OtherT>
-    bool operator!=(const OtherT &other) const
+    friend bool operator!=(const Rational_number<T> &other, const int64_t &num)
     {
-        static_assert(std::is_convertible<OtherT, T>::value, "Invalid type conversion");
-        return (this->numtor) != (static_cast<T>(other) * this->dentor);
+        return other != Rational_number<T>(num);
     }
+
+    /**
+     * @brief Перегрузка оператора != для сравнения рационального числа и числа целочисленного знакового типа
+     *
+     * @param[in] num Целочисленное знаковое значение
+     * @param[in] other Рациональное число
+     * @return true
+     * @return false
+     */
+    friend bool operator!=(const int64_t &num, const Rational_number<T> &other)
+    {
+        return other != Rational_number<T>(num);
+    }
+
+    // =========================================
 
     /**
      * @brief перезрузка оператора вывода << для печати числа
      *
-     * @param out поток для вывода
-     * @param other число
-     * @return [std::ostream&] - поток
+     * @param[in, out] out поток
+     * @param[in] other число
+     * @return поток
      */
     friend std::ostream &operator<<(std::ostream &out, const Rational_number<T> &other)
     {
@@ -802,9 +981,9 @@ public:
     }
 
     /**
-     * @brief Получение значения по модулю типа double
+     * @brief Получение значения по модулю типа
      *
-     * @return double
+     * @return модуль числа типа double
      */
     double abs() const
     {
@@ -814,7 +993,7 @@ public:
     /**
      * @brief Преобразование числа к строке
      *
-     * @return std::string
+     * @return число в виде строки
      */
     std::string to_string() const
     {

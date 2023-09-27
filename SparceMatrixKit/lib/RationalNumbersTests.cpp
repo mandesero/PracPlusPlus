@@ -4,7 +4,7 @@
 TEST(Rational_numberTestSuite, Rational_number_0)
 {
     /**
-     * Конструкторы
+     * Конструкторы, без переполнений
      */
     Rational_number<int64_t> a;
     Rational_number<int64_t> b(123);
@@ -22,6 +22,23 @@ TEST(Rational_numberTestSuite, Rational_number_0)
 TEST(Rational_numberTestSuite, Rational_number_1)
 {
     /**
+     * Конструкторы, переполнения
+     */
+
+    EXPECT_THROW(Rational_number<int8_t> a(129), RationalOverflowError<int64_t>);
+    EXPECT_THROW(Rational_number<int16_t> a(32768), RationalOverflowError<int64_t>);
+    EXPECT_THROW(Rational_number<int32_t> a(-2147483649), RationalOverflowError<int64_t>);
+    EXPECT_THROW(Rational_number<int64_t> a("-9223372036854775809"), RationalOverflowError<int64_t>);
+
+    EXPECT_THROW(Rational_number<int8_t> a(1337, 1), RationalOverflowError<int64_t>);
+    EXPECT_THROW(Rational_number<int16_t> a(2281337, 34), RationalOverflowError<int64_t>);
+    EXPECT_THROW(Rational_number<int32_t> a(-22822813371337, 24), RationalOverflowError<int64_t>);
+    EXPECT_THROW(Rational_number<int64_t> a("-9223372036854775809 / 123124"), RationalOverflowError<int64_t>);
+}
+
+TEST(Rational_numberTestSuite, Rational_number_2)
+{
+    /**
      * Операции + - / *
      */
     Rational_number<int64_t> first("213", "5");
@@ -30,9 +47,16 @@ TEST(Rational_numberTestSuite, Rational_number_1)
     EXPECT_EQ(first - second, Rational_number<int64_t>("10032", "220"));
     EXPECT_EQ(first * second, Rational_number<int64_t>("-28116", "220"));
     EXPECT_EQ(first / second, Rational_number<int64_t>("-9372", "660"));
+
+    /**
+     * Выражение
+     */
+    auto res = 2 * ((2 + first) * second / 3 + 11 / (first - second));
+    res.make_canonical();
+    EXPECT_EQ(res.to_string(), "-50569/570");
 }
 
-TEST(Rational_numberTestSuite, Rational_number_2)
+TEST(Rational_numberTestSuite, Rational_number_3)
 {
     /**
      * Операции += -= *= /=
@@ -47,9 +71,16 @@ TEST(Rational_numberTestSuite, Rational_number_2)
     EXPECT_EQ(first, Rational_number<int64_t>("-54432576/425920"));
     first /= second;
     EXPECT_EQ(first, Rational_number<int64_t>("2395033344/56221440"));
+
+    /**
+     * Выражение
+     */
+    first += 2 + first++ / 5;
+    first.make_canonical();
+    EXPECT_EQ(first.to_string(), "1358/25");
 }
 
-TEST(Rational_numberTestSuite, Rational_number_3)
+TEST(Rational_numberTestSuite, Rational_number_4)
 {
     /**
      * Операции ++, унарный -, получение нуля, make_canonical
@@ -67,7 +98,7 @@ TEST(Rational_numberTestSuite, Rational_number_3)
     EXPECT_EQ(first, Rational_number<int64_t>("0/1"));
 }
 
-TEST(Rational_numberTestSuite, Rational_number_4)
+TEST(Rational_numberTestSuite, Rational_number_5)
 {
     /**
      * Операции сравнения
@@ -81,14 +112,33 @@ TEST(Rational_numberTestSuite, Rational_number_4)
     EXPECT_EQ(first <= second, true);
     EXPECT_EQ(first == second, true);
     EXPECT_EQ(first != second, false);
+
+    EXPECT_EQ(first > 2, false);
+    EXPECT_EQ(first >= 2, true);
+    EXPECT_EQ(first < 2, false);
+    EXPECT_EQ(first <= 2, true);
+    EXPECT_EQ(first == 2, true);
+    EXPECT_EQ(first != 2, false);
+
+    EXPECT_EQ(2 > second, false);
+    EXPECT_EQ(2 >= second, true);
+    EXPECT_EQ(2 < second, false);
+    EXPECT_EQ(2 <= second, true);
+    EXPECT_EQ(2 == second, true);
+    EXPECT_EQ(2 != second, false);
 }
 
-TEST(Rational_numberTestSuite, Rational_number_5)
+TEST(Rational_numberTestSuite, Rational_number_6)
 {
     /**
      * Деление на 0
     */
     Rational_number<int64_t> first;
     Rational_number<int64_t> second("4/2");
-    EXPECT_ANY_THROW(second / first);
+    EXPECT_THROW(Rational_number<int8_t>("123/0"), RationalZeroDivisionError<int64_t>);
+    EXPECT_THROW(second / first, RationalZeroDivisionError<int64_t>);
+    EXPECT_THROW(first / first, RationalZeroDivisionError<int64_t>);
+    EXPECT_THROW(second / first, RationalZeroDivisionError<int64_t>);
+    EXPECT_THROW(5 / first, RationalZeroDivisionError<int64_t>);
+    EXPECT_THROW(second / 0, RationalZeroDivisionError<int64_t>);
 }
