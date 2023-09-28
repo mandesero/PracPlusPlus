@@ -20,7 +20,24 @@ int main()
 {
 
     // Matrix<std::unordered_map, Rational_number<int64_t>> a(1, 2);
-    Matrix<std::map, Rational_number<int64_t>> b;
-    // std::cout << b.shape().first << b.shape().second << std::endl;
+    // auto m = new Matrix<std::map, Rational_number<int64_t>>(3,3, 0.5);
+    // auto x = m->operator[](Matrix_coords(1,1));
+    // delete m;
+    // x.print();
+
+    Matrix<std::unordered_map, Rational_number<int64_t>> b(3,4, 0.5);
+    b[std::make_pair(1,1)] = Rational_number<int64_t>("2/3");
+    std::cout << b.to_string() << std::endl;
+    auto a = b[Matrix_row_coord(1)];
+    std::cout << a.to_string() << std::endl;
+    auto c = a.create_vector();
+    std::cout << c.to_string() << std::endl;
+
+    // std::cout << a(9, 2);
+    // Matrix_coords(-1, 2, 3, 4).calculate();
+    // std::cout << (~a).to_string() << std::endl;
     // std::cout << a.to_string() << '\n' << b.to_string() << std::endl;
 }
+
+
+

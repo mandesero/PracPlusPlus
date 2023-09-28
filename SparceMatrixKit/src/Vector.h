@@ -305,24 +305,24 @@ public:
      * @param other Матрица размера (n x m)
      * @return Вектор, являющийся результатом умножения вектора на матрицу
      */
-    Vector<T> operator*(const Matrix<T> &other)
-    {
-        if (len != other.getRows())
-            throw std::logic_error("Invalid operands");
-        Vector<T> result(other.getColumns());
+    // Vector<T> operator*(const Matrix<T> &other)
+    // {
+    //     if (len != other.getRows())
+    //         throw std::logic_error("Invalid operands");
+    //     Vector<T> result(other.getColumns());
 
-        for (int j = 1; j < other.getColumns() + 1; ++j)
-        {
-            T sum = T();
-            for (int k = 1; k < len + 1; ++k)
-            {
-                sum += at(k) * other.at(k, j);
-            }
-            result.set(j, sum);
-        }
+    //     for (int j = 1; j < other.getColumns() + 1; ++j)
+    //     {
+    //         T sum = T();
+    //         for (int k = 1; k < len + 1; ++k)
+    //         {
+    //             sum += at(k) * other.at(k, j);
+    //         }
+    //         result.set(j, sum);
+    //     }
 
-        return result;
-    }
+    //     return result;
+    // }
 
     /**
      * @brief Перегрузка оператора ==, для проверки векторов на равенство
