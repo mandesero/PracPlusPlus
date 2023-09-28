@@ -12,9 +12,7 @@
 #include <map>
 #include <unordered_map>
 
-#include "Other.h"
-
-#include "NewMatrix.h"
+#include "Matrix.h"
 
 int main()
 {

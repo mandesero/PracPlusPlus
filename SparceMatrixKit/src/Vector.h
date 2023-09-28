@@ -1,11 +1,13 @@
 #pragma once
 
+#include "Rational.h"
+#include "Matrix.h"
+
 #include <iostream>
 
 #include <type_traits>
 #include <cmath>
 #include <map>
-#include "Matrix.h"
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
