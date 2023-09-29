@@ -104,6 +104,12 @@ struct Matrix_column_coord
     explicit Matrix_column_coord(uint64_t column) : column(column) {}
 };
 
+/**
+ * @brief Proxy объект матрицы
+ *
+ * @tparam Container
+ * @tparam T
+ */
 template <template <class, class...> class Container, class T>
 class Matrix_proxy;
 
@@ -403,7 +409,32 @@ public:
     /*
         =========================== Умножение на вектор ===========================
     */
-    // TODO
+
+    /**
+     * @brief Перегрузка оператора умножения матрицы на вектор
+     *
+     * @param[in] other вектор
+     * @return Вектор, являющийся произведением матрицы на вектор
+     */
+    Vector<T> operator*(const Vector<T> &other)
+    {
+        if (other.getLen() != size.second)
+            throw MatrixShapeError("", __FILE__, __LINE__, "operator * vector", size, other.shape());
+
+        Vector<T> result(size.first);
+
+        for (int i = 1; i < size.first + 1; ++i)
+        {
+            T sum = T();
+            for (int j = 1; j < size.first + 1; ++j)
+            {
+                sum += at(i, j) * other.at(j);
+            }
+            result.set(i, sum);
+        }
+        return result;
+    }
+
     /*
         =========================== Прочее ===========================
     */
@@ -540,8 +571,16 @@ public:
     /*
         =========================== Чтение с потока ===========================
     */
-    static Matrix<Container, T> readFromStream(std::ifstream &file)
+
+    /**
+     * @brief Метод для чтения матрицы с файла
+     *
+     * @param[in] file файловый поток
+     * @return Прочитанная матрица
+     */
+    static Matrix<Container, T> readFromFile(std::string &&filename)
     {
+        std::ifstream file(filename);
         if (!file.is_open())
             throw MatrixReadFromFileError("", __FILE__, __LINE__);
 
@@ -586,7 +625,6 @@ public:
                 _T1 = T::getTypeNames().first;
                 _T2 = T::getTypeNames().second;
 
-                std::cout << params[2] << in_types[_T1] << params[3] << in_types[_T2] << std::endl;
                 if (params[2] != in_types[_T1] || params[3] != in_types[_T2])
                     throw MatrixReadFromFileError("Incorrect complex im and real field types. ", __FILE__, __LINE__);
 
@@ -598,6 +636,31 @@ public:
 
         auto new_matrix = Matrix<Container, T>(rows, columns);
 
+        uint64_t idx_1, idx_2;
+        while (std::getline(file, line))
+        {
+            if (line.empty() || startsWithHash(line))
+                continue;
+
+            std::istringstream iss(line);
+            iss >> idx_1 >> idx_2;
+            if (params[1] == "complex")
+            {
+                auto left = line.find('(');
+                auto right = line.find(')');
+                auto valueString = line.substr(left + 1, right - left - 1);
+                auto value = T(valueString.c_str());
+                new_matrix.set(idx_1, idx_2, value);
+            }
+            else if (params[1] == "rational")
+            {
+                auto left = line.find('<');
+                auto right = line.find('>');
+                auto valueString = line.substr(left + 1, right - left - 1);
+                auto value = T(valueString.c_str());
+                new_matrix.set(idx_1, idx_2, value);
+            }
+        }
         return new_matrix;
     }
 };
@@ -643,10 +706,10 @@ public:
         if (matrix == nullptr)
             throw ProxyPointerError("Basic matrix was deleted.", __FILE__, __LINE__);
 
-        if (idx_row != -1 && !(1 <= idx_row && idx_row <= matrix->shape().first))
+        if (idx_row != -1 && !(1 <= idx_row && index <= matrix->shape().first))
             throw ProxyIndexError("", __FILE__, __LINE__, "operator []", matrix->shape().first, index);
 
-        if (idx_column != -1 && !(1 <= idx_column && idx_column <= matrix->shape().second))
+        if (idx_column != -1 && !(1 <= idx_column && index <= matrix->shape().second))
             throw ProxyIndexError("", __FILE__, __LINE__, "operator []", matrix->shape().second, index);
 
         return idx_column == -1 ? matrix->at(idx_row, index) : matrix->at(index, idx_column);
@@ -1046,7 +1109,32 @@ public:
     /*
         =========================== Умножение на вектор ===========================
     */
-    // TODO
+    
+    /**
+     * @brief Перегрузка оператора умножения матрицы на вектор
+     *
+     * @param[in] other вектор
+     * @return Вектор, являющийся произведением матрицы на вектор
+     */
+    Vector<T> operator*(const Vector<T> &other)
+    {
+        if (other.getLen() != size.second)
+            throw MatrixShapeError("", __FILE__, __LINE__, "operator * vector", size, std::make_pair(other.getLen(), 1));
+
+        Vector<T> result(size.first);
+
+        for (int i = 1; i < size.first + 1; ++i)
+        {
+            T sum = T();
+            for (int j = 1; j < size.first + 1; ++j)
+            {
+                sum += at(i, j) * other.at(j);
+            }
+            result.set(i, sum);
+        }
+        return result;
+    }
+
     /*
         =========================== Прочее ===========================
     */
@@ -1179,4 +1267,96 @@ public:
         proxies.push_back(&tmp);
         return tmp;
     }
-};
+
+    /**
+     * @brief Метод для чтения матрицы с файла
+     *
+     * @param[in] file файловый поток
+     * @return Прочитанная матрица
+     */
+    static Matrix<std::unordered_map, T> readFromFile(std::string &&filename)
+    {
+        std::ifstream file(filename);
+        if (!file.is_open())
+            throw MatrixReadFromFileError("", __FILE__, __LINE__);
+
+        std::string line, _T1, _T2;
+        uint64_t rows, columns;
+        std::vector<std::string> params;
+        while (std::getline(file, line))
+        {
+            if (line.empty() || startsWithHash(line))
+                continue;
+
+            std::istringstream iss(line);
+            params = std::vector<std::string>(std::istream_iterator<std::string>{iss}, std::istream_iterator<std::string>());
+
+            if (params[0] != "matrix")
+                throw MatrixReadFromFileError("File not contains matrix.", __FILE__, __LINE__);
+
+            if (T::type() != params[1])
+                throw MatrixReadFromFileError("Incorrect type of input matrix.", __FILE__, __LINE__);
+
+            if (params[1] == "rational")
+            {
+                if (params.size() != 4)
+                    throw MatrixReadFromFileError("To many params. Expected 4. But given " + std::to_string(params.size()), __FILE__, __LINE__);
+
+                rows = std::stoll(params[2]);
+                columns = std::stoll(params[3]);
+            }
+            else if (params[1] == "complex")
+            {
+                if (params.size() != 6)
+                    throw MatrixReadFromFileError("To many params. Expected 6. But given " + std::to_string(params.size()), __FILE__, __LINE__);
+
+                std::map<std::string, std::string> in_types;
+                in_types["a"] = "integer";
+                in_types["s"] = "integer";
+                in_types["i"] = "integer";
+                in_types["l"] = "integer";
+                in_types["f"] = "float";
+                in_types["d"] = "float";
+
+                _T1 = T::getTypeNames().first;
+                _T2 = T::getTypeNames().second;
+
+                if (params[2] != in_types[_T1] || params[3] != in_types[_T2])
+                    throw MatrixReadFromFileError("Incorrect complex im and real field types. ", __FILE__, __LINE__);
+
+                rows = std::stoll(params[4]);
+                columns = std::stoll(params[5]);
+            }
+            break;
+        }
+
+        auto new_matrix = Matrix<std::unordered_map, T>(rows, columns);
+
+        uint64_t idx_1, idx_2;
+        while (std::getline(file, line))
+        {
+            if (line.empty() || startsWithHash(line))
+                continue;
+
+            std::istringstream iss(line);
+            iss >> idx_1 >> idx_2;
+            if (params[1] == "complex")
+            {
+                auto left = line.find('(');
+                auto right = line.find(')');
+                auto valueString = line.substr(left + 1, right - left - 1);
+                auto value = T(valueString.c_str());
+                new_matrix.set(idx_1, idx_2, value);
+            }
+            else if (params[1] == "rational")
+            {
+                auto left = line.find('<');
+                auto right = line.find('>');
+                auto valueString = line.substr(left + 1, right - left - 1);
+                auto value = T(valueString.c_str());
+                new_matrix.set(idx_1, idx_2, value);
+            }
+        }
+        return new_matrix;
+    }
+};;

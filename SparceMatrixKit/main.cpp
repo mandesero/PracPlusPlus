@@ -25,9 +25,11 @@ int main()
     // x.print();
 
 
-    // std::string filename = "input/in_matrix_2";
+    // std::string filename = "input/in_vector_2";
     // std::ifstream file(filename);
-    // auto x = Matrix<std::map, Complex_number<int8_t, double>>::readFromStream(file);
+    // auto x = Vector<Rational_number<int8_t>>::readFromStream(file);
+
+    // std::cout << x.to_string() << std::endl;
     
     
     // Matrix<std::unordered_map, Rational_number<int64_t>> b(3,4, 0.5);
@@ -37,12 +39,7 @@ int main()
     // std::cout << a.to_string() << std::endl;
     // auto c = a.create_vector();
 
-    std::string input = "1 2 <1 / 4>";
-    std::istringstream iss(input);
-    std::vector<std::string> params(std::istream_iterator<std::string>{iss}, std::istream_iterator<std::string>());
 
-    for (auto &s: params)
-        std::cout << s << '\n';
 
     // std::cout << a(9, 2);
     // Matrix_coords(-1, 2, 3, 4).calculate();

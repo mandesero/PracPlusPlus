@@ -259,3 +259,28 @@ private:
     int m_line;
     mutable std::string errorMessage;
 };
+
+class VectorReadFromFileError : public std::exception
+{
+public:
+    VectorReadFromFileError(
+        const std::string &message,
+        const char *file,
+        int line) : m_message(message), m_file(file), m_line(line) {}
+
+    const char *
+    what() const _GLIBCXX_TXN_SAFE_DYN _GLIBCXX_NOTHROW override
+    {
+        std::ostringstream oss;
+        oss << " Cannot read from file. " << m_file << " at line " << m_line << ": " << m_message << '\n';
+
+        errorMessage = oss.str();
+        return errorMessage.c_str();
+    }
+
+private:
+    std::string m_message;
+    const char *m_file;
+    int m_line;
+    mutable std::string errorMessage;
+};

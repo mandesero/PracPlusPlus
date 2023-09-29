@@ -12,9 +12,12 @@
 #include <sstream>
 #include <stdexcept>
 
+template <template <class, class...> class Container, class T>
+class Matrix;
+
 /**
  * @brief Шаблонный класс для хранения разреженных векторов
- * 
+ *
  * @tparam T - тип элементов вектора
  */
 template <typename T>
@@ -302,29 +305,31 @@ public:
     }
 
     /**
-     * @brief Перегрузка оператора умножения для умножения вектора (размера n) на матрицу (размера n x m)
+     * @brief Перегрузка оператора умножения вектора на матрицу
      *
-     * @param other Матрица размера (n x m)
+     * @param[in] other Матрица
      * @return Вектор, являющийся результатом умножения вектора на матрицу
      */
-    // Vector<T> operator*(const Matrix<T> &other)
-    // {
-    //     if (len != other.getRows())
-    //         throw std::logic_error("Invalid operands");
-    //     Vector<T> result(other.getColumns());
+    template <template <class, class...> class Container, class U>
+    Vector<T> operator*(const Matrix<Container, U> &other)
+    {
+        if (len != other.shape().first)
+            throw MatrixShapeError("", __FILE__, __LINE__, "operator * vector", std::make_pair(len, 1), other.shape());
 
-    //     for (int j = 1; j < other.getColumns() + 1; ++j)
-    //     {
-    //         T sum = T();
-    //         for (int k = 1; k < len + 1; ++k)
-    //         {
-    //             sum += at(k) * other.at(k, j);
-    //         }
-    //         result.set(j, sum);
-    //     }
+        Vector<T> result(other.shape().second);
 
-    //     return result;
-    // }
+        for (int j = 1; j < other.shape().second + 1; ++j)
+        {
+            T sum = T();
+            for (int k = 1; k < len + 1; ++k)
+            {
+                sum += at(k) * other.at(k, j);
+            }
+            result.set(j, sum);
+        }
+
+        return result;
+    }
 
     /**
      * @brief Перегрузка оператора ==, для проверки векторов на равенство
@@ -336,5 +341,95 @@ public:
     bool operator==(const Vector<T> &other) const
     {
         return data == other.getData() && eps == other.getEps() && len == other.getLen();
+    }
+
+    /**
+     * @brief Метод для чтения матрицы с файла
+     *
+     * @param[in] file файловый поток
+     * @return Прочитанная матрица
+     */
+    static Vector<T> readFromFile(std::string &filename)
+    {
+        std::ifstream file(filename);
+        if (!file.is_open())
+            throw VectorReadFromFileError("", __FILE__, __LINE__);
+
+        std::string line, _T1, _T2;
+        uint64_t len;
+        std::vector<std::string> params;
+        while (std::getline(file, line))
+        {
+            if (line.empty() || startsWithHash(line))
+                continue;
+
+            std::istringstream iss(line);
+            params = std::vector<std::string>(std::istream_iterator<std::string>{iss}, std::istream_iterator<std::string>());
+
+            if (params[0] != "vector")
+                throw VectorReadFromFileError("File not contains vector.", __FILE__, __LINE__);
+
+            if (T::type() != params[1])
+                throw MatrixReadFromFileError("Incorrect type of input vector.", __FILE__, __LINE__);
+
+            if (params[1] == "rational")
+            {
+                if (params.size() != 3)
+                    throw MatrixReadFromFileError("To many params. Expected 3. But given " + std::to_string(params.size()), __FILE__, __LINE__);
+
+                len = std::stoll(params[2]);
+            }
+            else if (params[1] == "complex")
+            {
+                if (params.size() != 5)
+                    throw MatrixReadFromFileError("To many params. Expected 5. But given " + std::to_string(params.size()), __FILE__, __LINE__);
+
+                std::map<std::string, std::string> in_types;
+                in_types["a"] = "integer";
+                in_types["s"] = "integer";
+                in_types["i"] = "integer";
+                in_types["l"] = "integer";
+                in_types["f"] = "float";
+                in_types["d"] = "float";
+
+                _T1 = T::getTypeNames().first;
+                _T2 = T::getTypeNames().second;
+
+                if (params[2] != in_types[_T1] || params[3] != in_types[_T2])
+                    throw MatrixReadFromFileError("Incorrect complex im and real field types. ", __FILE__, __LINE__);
+
+                len = std::stoll(params[4]);
+            }
+            break;
+        }
+
+        auto new_vector = Vector<T>(len);
+
+        uint64_t idx;
+        while (std::getline(file, line))
+        {
+            if (line.empty() || startsWithHash(line))
+                continue;
+
+            std::istringstream iss(line);
+            iss >> idx;
+            if (params[1] == "complex")
+            {
+                auto left = line.find('(');
+                auto right = line.find(')');
+                auto valueString = line.substr(left + 1, right - left - 1);
+                auto value = T(valueString.c_str());
+                new_vector.set(idx, value);
+            }
+            else if (params[1] == "rational")
+            {
+                auto left = line.find('<');
+                auto right = line.find('>');
+                auto valueString = line.substr(left + 1, right - left - 1);
+                auto value = T(valueString.c_str());
+                new_vector.set(idx, value);
+            }
+        }
+        return new_vector;
     }
 };
