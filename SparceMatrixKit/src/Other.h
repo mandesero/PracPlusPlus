@@ -4,7 +4,13 @@
 #include <fstream>
 #include <sstream>
 #include <cstring>
+#include <string>
+#include <algorithm>
+#include <cctype>
 #include <type_traits>
+
+
+bool startsWithHash(const std::string &input);
 
 /**
  * @brief Проверка происходит ли переполнения типа, задаваемого в шаблоне
@@ -91,3 +97,4 @@ bool checkOverFlow(int64_t s)
 {
     return checkOverFlow<T>(std::to_string(s).c_str());
 }
+

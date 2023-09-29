@@ -24,6 +24,20 @@ protected:
 
 private:
 public:
+
+    static auto getTypeNames()
+    {
+        return std::pair<const char *, const char *>(typeid(T).name(), typeid(T).name());
+    }
+    /**
+     * @brief Вывод названия типа
+     * 
+     */
+    static auto type()
+    {
+        return "rational";
+    }
+
     /**
      * @brief Конструктор по умолчанию
      *

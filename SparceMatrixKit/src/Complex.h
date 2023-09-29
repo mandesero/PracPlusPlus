@@ -27,6 +27,21 @@ protected:
 
 private:
 public:
+
+    static auto getTypeNames()
+    {
+        return std::pair<const char *, const char *>(typeid(T).name(), typeid(U).name());
+    }
+
+    /**
+     * @brief Вывод названия типа
+     *
+     */
+    static auto type()
+    {
+        return "complex";
+    }
+
     /**
      * @brief Конструктор
      *
@@ -447,70 +462,70 @@ public:
 
     /**
      * @brief Сравнения двух комплексных чисел на <
-     * 
-     * @param other 
-     * @return true 
-     * @return false 
+     *
+     * @param other
+     * @return true
+     * @return false
      */
     bool operator<(const Complex_number<T, U> &other) const
     {
         return this->getRadius() < other.getRadius();
     }
 
-     /**
+    /**
      * @brief Сравнения двух комплексных чисел на <=
-     * 
-     * @param other 
-     * @return true 
-     * @return false 
-     */    
+     *
+     * @param other
+     * @return true
+     * @return false
+     */
     bool operator<=(const Complex_number<T, U> &other) const
     {
         return this->getRadius() <= other.getRadius();
     }
 
-     /**
+    /**
      * @brief Сравнения двух комплексных чисел на >
-     * 
-     * @param other 
-     * @return true 
-     * @return false 
+     *
+     * @param other
+     * @return true
+     * @return false
      */
     bool operator>(const Complex_number<T, U> &other) const
     {
         return this->getRadius() > other.getRadius();
     }
 
-     /**
+    /**
      * @brief Сравнения двух комплексных чисел на >=
-     * 
-     * @param other 
-     * @return true 
-     * @return false 
+     *
+     * @param other
+     * @return true
+     * @return false
      */
     bool operator>=(const Complex_number<T, U> &other) const
     {
         return this->getRadius() >= other.getRadius();
     }
 
-     /**
+    /**
      * @brief Сравнения двух комплексных чисел на ==
-     * 
-     * @param other 
-     * @return true 
-     * @return false 
+     *
+     * @param other
+     * @return true
+     * @return false
      */
     bool operator==(const Complex_number<T, U> &other) const
     {
         return this->getRadius() == other.getRadius();
     }
 
-     /**
+    /**
      * @brief Сравнения двух комплексных чисел на !=
-     * 
-     * @param other 
-     * @return true 
-     * @return false 
+     *
+     * @param other
+     * @return true
+     * @return false
      */
     bool operator!=(const Complex_number<T, U> &other) const
     {
@@ -518,11 +533,11 @@ public:
     }
 
     /**
-     * @brief Перегрузка оператора вывод << 
-     * 
-     * @param out 
-     * @param other 
-     * @return std::ostream& 
+     * @brief Перегрузка оператора вывод <<
+     *
+     * @param out
+     * @param other
+     * @return std::ostream&
      */
     friend std::ostream &operator<<(std::ostream &out, const Complex_number<T, U> &other)
     {
@@ -532,8 +547,8 @@ public:
 
     /**
      * @brief Получение модуля числа
-     * 
-     * @return double 
+     *
+     * @return double
      */
     double abs() const
     {
@@ -542,8 +557,8 @@ public:
 
     /**
      * @brief Преобразование числа к строке
-     * 
-     * @return std::string 
+     *
+     * @return std::string
      */
     std::string to_string() const
     {

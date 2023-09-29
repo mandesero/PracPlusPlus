@@ -13,7 +13,6 @@
 
 #include "Vector.h"
 
-
 template <typename T>
 class Vector;
 
@@ -537,6 +536,70 @@ public:
         proxies.push_back(&tmp);
         return tmp;
     }
+
+    /*
+        =========================== Чтение с потока ===========================
+    */
+    static Matrix<Container, T> readFromStream(std::ifstream &file)
+    {
+        if (!file.is_open())
+            throw MatrixReadFromFileError("", __FILE__, __LINE__);
+
+        std::string line, _T1, _T2;
+        uint64_t rows, columns;
+        std::vector<std::string> params;
+        while (std::getline(file, line))
+        {
+            if (line.empty() || startsWithHash(line))
+                continue;
+
+            std::istringstream iss(line);
+            params = std::vector<std::string>(std::istream_iterator<std::string>{iss}, std::istream_iterator<std::string>());
+
+            if (params[0] != "matrix")
+                throw MatrixReadFromFileError("File not contains matrix.", __FILE__, __LINE__);
+
+            if (T::type() != params[1])
+                throw MatrixReadFromFileError("Incorrect type of input matrix.", __FILE__, __LINE__);
+
+            if (params[1] == "rational")
+            {
+                if (params.size() != 4)
+                    throw MatrixReadFromFileError("To many params. Expected 4. But given " + std::to_string(params.size()), __FILE__, __LINE__);
+
+                rows = std::stoll(params[2]);
+                columns = std::stoll(params[3]);
+            }
+            else if (params[1] == "complex")
+            {
+                if (params.size() != 6)
+                    throw MatrixReadFromFileError("To many params. Expected 6. But given " + std::to_string(params.size()), __FILE__, __LINE__);
+
+                std::map<std::string, std::string> in_types;
+                in_types["a"] = "integer";
+                in_types["s"] = "integer";
+                in_types["i"] = "integer";
+                in_types["l"] = "integer";
+                in_types["f"] = "float";
+                in_types["d"] = "float";
+
+                _T1 = T::getTypeNames().first;
+                _T2 = T::getTypeNames().second;
+
+                std::cout << params[2] << in_types[_T1] << params[3] << in_types[_T2] << std::endl;
+                if (params[2] != in_types[_T1] || params[3] != in_types[_T2])
+                    throw MatrixReadFromFileError("Incorrect complex im and real field types. ", __FILE__, __LINE__);
+
+                rows = std::stoll(params[4]);
+                columns = std::stoll(params[5]);
+            }
+            break;
+        }
+
+        auto new_matrix = Matrix<Container, T>(rows, columns);
+
+        return new_matrix;
+    }
 };
 
 template <template <class, class...> class Container, class T>
@@ -658,8 +721,8 @@ public:
 
     /**
      * @brief Преобразование прокси к вектору
-     * 
-     * @return вектор 
+     *
+     * @return вектор
      */
     auto create_vector()
     {
@@ -686,7 +749,6 @@ public:
     }
 };
 
-
 template <typename T>
 class Matrix<std::unordered_map, T>
 {
@@ -699,9 +761,9 @@ protected:
     std::vector<Matrix_proxy<std::unordered_map, T> *> proxies;
 
 public:
-        /*
-        =========================== Конструкторы ===========================
-    */
+    /*
+    =========================== Конструкторы ===========================
+*/
 
     /**
      * @brief Конструктор по умолчанию
