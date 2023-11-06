@@ -59,12 +59,6 @@ public:
         size_t proc1 = std::distance(procTimes.begin(), maxIt);
         size_t proc2 = std::distance(procTimes.begin(), minIt);
 
-        // while (proc1 == proc2)
-        // {
-        //     proc1 = std::experimental::randint(0, this->procs - 1);
-        //     proc2 = std::experimental::randint(0, this->procs - 1);
-        // }
-
         std::vector<Job> new_jobs_1;
         std::vector<Job> new_jobs_2;
 
